@@ -1,0 +1,43 @@
+﻿body {
+  margin:0px;
+  background-color:rgba(51, 51, 51, 1);
+  background-image:none;
+  position:static;
+  left:auto;
+  width:500px;
+  margin-left:0;
+  margin-right:0;
+  text-align:left;
+}
+#base {
+  position:absolute;
+  z-index:0;
+}
+#u6684_div {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:400px;
+  height:112px;
+  background:inherit;
+  background-color:rgba(255, 255, 255, 0);
+  -moz-box-shadow:none;
+  -webkit-box-shadow:none;
+  box-shadow:none;
+  line-height:28px;
+}
+#u6684 {
+  position:absolute;
+  left:100px;
+  top:100px;
+  width:400px;
+  height:112px;
+  line-height:28px;
+}
+#u6685 {
+  position:absolute;
+  left:0px;
+  top:0px;
+  width:400px;
+  word-wrap:break-word;
+}

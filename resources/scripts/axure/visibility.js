@@ -99,6 +99,12 @@
 
     var _setVisibility = function(parentId, childId, options, preserveScroll) {
         var wrapped = $jobj(childId);
+
+
+
+        //easing: easingOut
+
+
         var completeTotal = 1;
         var visible = $ax.visibility.IsIdVisible(childId);
 
@@ -135,8 +141,9 @@
 
                 sizeObj = $jobj(sizeId);
                 var newSize = options.cull || sizeObj;
-                sizeObj.width(newSize.width());
-                sizeObj.height(newSize.height());
+                var newAxSize = $ax('#' + newSize.attr('id'));
+                sizeObj.width(newAxSize.width());
+                sizeObj.height(newAxSize.height());
             }
         }
 
@@ -144,11 +151,12 @@
         var visibleWrapped = wrapped;
         if(needContainer) {
             var childObj = $obj(childId);
-            if(options.cull) {
-                var containerWidth = options.cull.width();
-                var containerHeight = options.cull.height();
+            if (options.cull) {
+                var axCull = $ax('#' + options.cull.attr('id'));
+                var containerWidth = axCull.width();
+                var containerHeight = axCull.height();
             } else {
-                if(childObj && ($ax.public.fn.IsLayer(childObj.type) || childObj.generateCompound)) {
+                if(childObj && ($ax.public.fn.IsLayer(childObj.type))) {// || childObj.generateCompound)) {
                     var boundingRectangle = $ax.public.fn.getWidgetBoundingRect(childId);
                     wrappedOffset.left = boundingRectangle.left;
                     wrappedOffset.top = boundingRectangle.top;
@@ -159,24 +167,6 @@
                     containerHeight = $ax('#' + childId).height();
                 }
             }
-
-            //var fixedInfo = $ax.dynamicPanelManager.getFixedInfo(childId);
-            //var childObj = $obj(childId);
-            //if(childObj && (childObj.type == 'layer' || childObj.generateCompound)) {
-            //    var boundingRectangle = $ax.public.fn.getWidgetBoundingRect(childId);
-            //    wrappedOffset.left = boundingRectangle.left;
-            //    wrappedOffset.top = boundingRectangle.top;
-            //    var containerWidth = boundingRectangle.width;
-            //    var containerHeight = boundingRectangle.height;
-            //} else {
-            //    containerWidth = $ax('#' + childId).width();
-            //    containerHeight = $ax('#' + childId).height();
-            //}
-
-            //if(options.cull) {
-            //    containerWidth = options.cull.width();
-            //    containerHeight = options.cull.height();
-            //}
 
             var containerId = $ax.visibility.applyWidgetContainer(childId);
 //            var container = _makeContainer(containerId, options.cull || boundingRectangle, isFullWidth, options.easing == 'flip', wrappedOffset, options.containerExists);
@@ -218,11 +208,16 @@
         var completeCount = 0;
         var onComplete = function () {
             completeCount++;
-            if(needContainer && completeCount == completeTotal) {
-                if(options.containInner && !containerExists && (wrappedOffset.left != 0 || wrappedOffset.top != 0)) {
+            if (needContainer && completeCount == completeTotal) {
+                if ($ax.public.fn.isCompoundVectorHtml(container.parent()[0])) {
+                    wrappedOffset.left = $ax.getNumFromPx(container.css('left'));
+                    wrappedOffset.top = $ax.getNumFromPx(container.css('top'));
+                }
 
+                if (options.containInner && !containerExists && (wrappedOffset.left != 0 || wrappedOffset.top != 0)) {
                     for (i = 0; i < wrapped.length; i++) {
                         inner = $(wrapped[i]);
+                        //if ($ax.public.fn.isCompoundVectorComponentHtml(inner[0])) break;
                         inner.css('left', $ax.getNumFromPx(inner.css('left')) + wrappedOffset.left);
                         inner.css('top', $ax.getNumFromPx(inner.css('top')) + wrappedOffset.top);
                     }
@@ -407,7 +402,6 @@
                 switch(options.direction) {
                     case 'right':
                     case 'left':
-                        //if(!childObj.generateCompound) _setRotateTransformation(wrapped, 'rotateY(0deg)');
                         flipdegree = options.direction === 'right' ? 'rotateY(180deg)' : 'rotateY(-180deg)';
                         break;
                     case 'up':
@@ -662,12 +656,16 @@
                         $ax.visibility.applyWidgetContainer(childId, true).css(cssChange);
                     } else {
                         var jobj = $jobj(childId);
-                        if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
-                            var componentIds = $ax('#' + childId).getChildren()[0].children;
-                            for (var j = 0; j < componentIds.length; j++) {
-                                if(componentIds[j].indexOf(childId + 'p') >= 0) $jobj(componentIds[j]).css(cssChange);
-                            }
-                        } else jobj.css(cssChange);
+                        //if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
+                        //    var grandChildren = jobj[0].children;
+                        //    //while (grandChildren.length > 0 && grandChildren[0].id.indexOf('container') >= 0) grandChildren = grandChildren[0].children;
+
+                        //    for (var j = 0; j < grandChildren.length; j++) {
+                        //        var grandChildId = grandChildren[j].id;
+                        //        if (grandChildId.indexOf(childId + 'p') >= 0 || grandChildId.indexOf('_container') >= 0) $jobj(grandChildId).css(cssChange);
+                        //    }
+                        //} else 
+                            jobj.css(cssChange);
                     }
 
                     container.append($jobj(childId));
@@ -712,12 +710,15 @@
                     _popContainer(childId, false);
                 } else {
                     var jobj = $jobj(childId);
-                    if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
-                        var componentIds = $ax('#' + childId).getChildren()[0].children;
-                        for (var j = 0; j < componentIds.length; j++) {
-                            if (componentIds[j].indexOf(childId + 'p') >= 0) $jobj(componentIds[j]).css(cssChange);
-                        }
-                    } else jobj.css(cssChange);
+                //    if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
+                //        var grandChildren = jobj[0].children;
+                //        //while (grandChildren.length > 0 && grandChildren[0].id.indexOf('container') >= 0) grandChildren = grandChildren[0].children;
+                //        for (var j = 0; j < grandChildren.length; j++) {
+                //            var grandChildId = grandChildren[j].id;
+                //            if (grandChildId.indexOf(childId + 'p') >= 0 || grandChildId.indexOf('_container') >= 0) $jobj(grandChildId).css(cssChange);
+                //        }
+                //} else
+                        jobj.css(cssChange);
                 }
             }
         }
@@ -843,8 +844,9 @@
 
     var _slideStateOut = function (container, stateId, options, onComplete, jobj) {
         var directionOut = options.direction;
-        var width = container.width();
-        var height = container.height();
+        var axObject = $ax('#' + container.attr('id'));
+        var width = axObject.width();
+        var height = axObject.height();
 
         if(directionOut == "right") {
             $ax.move.MoveWidget(stateId, width, 0, options, false, onComplete, false, jobj);
@@ -859,8 +861,9 @@
 
     var _slideStateIn = function (id, stateId, options, container, makePanelVisible, onComplete, jobj, preserveScroll) {
         var directionIn = options.direction;
-        var width = container.width();
-        var height = container.height();
+        var axObject = $ax('#' +container.attr('id'));
+        var width = axObject.width();
+        var height = axObject.height();
 
         for(var i = 0; i < jobj.length; i++) {
             var child = $(jobj[i]);
@@ -918,7 +921,7 @@
 
     var _limboIds = _visibility.limboIds = {};
     // limboId's is a dictionary of id->true, essentially a set.
-    var _addLimboAndHiddenIds = $ax.visibility.addLimboAndHiddenIds = function(newLimboIds, newHiddenIds, query) {
+    var _addLimboAndHiddenIds = $ax.visibility.addLimboAndHiddenIds = function(newLimboIds, newHiddenIds, query, skipRepeater) {
         var limboedByMaster = {};
         for(var key in newLimboIds) {
             if (!$ax.public.fn.IsReferenceDiagramObject($ax.getObjectFromElementId(key).type)) continue;
@@ -944,6 +947,8 @@
             // Rdos already handled, contained widgets are limboed by the parent, and sub menus should be ignored
             if($ax.public.fn.IsReferenceDiagramObject(diagramObject.type) || $ax.public.fn.IsTableCell(diagramObject.type) || diagramObject.isContained || $jobj(elementId).hasClass('sub_menu')) return;
             if(diagramObject.type == 'table' && $jobj(elementId).parent().hasClass('ax_menu')) return;
+            if(skipRepeater && $ax.getParentRepeaterFromElementId(elementId)) return;
+
             var scriptId = $ax.repeater.getScriptIdFromElementId(elementId);
             var shouldBeVisible = Boolean(!newLimboIds[scriptId] && !newHiddenIds[scriptId]);
             var isVisible = Boolean(_isIdVisible(elementId));
@@ -971,7 +976,7 @@
     $ax.visibility.resetLimboAndHiddenToDefaults = function (query) {
         if(!query) query = $ax('*');
         _clearLimboAndHidden();
-        _addLimboAndHiddenIds(_defaultLimbo, _defaultHidden, query);
+        _addLimboAndHiddenIds(_defaultLimbo, _defaultHidden, query, true);
     };
 
     $ax.visibility.isScriptIdLimbo = function(scriptId) {
@@ -994,7 +999,7 @@
             _defaultLimbo[$ax.repeater.getScriptIdFromElementId(diagramObject.id)] = true;
         });
 
-        $ax.visibility.addLimboAndHiddenIds(_defaultLimbo, _defaultHidden, $ax('*'));
+        _addLimboAndHiddenIds(_defaultLimbo, _defaultHidden, $ax('*'), true);
     };
 
 });

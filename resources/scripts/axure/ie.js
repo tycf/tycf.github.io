@@ -295,13 +295,15 @@ $axure.internal(function($ax) {
         var inputs = $('input').not(':input[type=button], :input[type=submit], :input[type=radio], :input[type=checkbox]');
         inputs.each(function() {
             var $input = $(this);
-            $input.css('height', ($input.height() - 4 + 'px')).css('width', ($input.width() - 2 + 'px'));
+            var axInput = $ax('#' + $input.attr('id'));
+            $input.css('height', (axInput.height() - 4 + 'px')).css('width', (axInput.width() - 2 + 'px'));
         });
 
         var textAreas = $($ax.constants.TEXT_AREA_TYPE);
         textAreas.each(function() {
             var $textArea = $(this);
-            $textArea.css('height', ($textArea.height() - 6 + 'px')).css('width', ($textArea.width() - 6 + 'px'));
+            var axText = $ax('#' + $textArea.attr('id'));
+            $textArea.css('height', (axText.height() - 6 + 'px')).css('width', (axText.width() - 6 + 'px'));
         });
     };
 

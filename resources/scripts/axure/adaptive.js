@@ -45,7 +45,9 @@
         if(imageUrl.indexOf(".png") > -1) $ax.utils.fixPng(imageQuery[0]);
     };
 
-    var _switchView = function(viewId, forceSwitchTo) {
+    var _switchView = function (viewId, forceSwitchTo) {
+        if(!$ax.pageData.isAdaptiveEnabled) return;
+
         var previousViewId = $ax.adaptive.currentViewId;
         if(typeof previousViewId == 'undefined') previousViewId = '';
         if(typeof viewId == 'undefined') viewId = '';
@@ -91,6 +93,8 @@
         if(previousViewId) {
             $ax.style.clearAdaptiveStyles();
             $('*').removeClass(previousViewId);
+        } else {
+            $ax.style.reselectElements();
         }
 
         $axure('*').each(function(obj, elementId) {

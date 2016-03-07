@@ -25,6 +25,7 @@ $axure.internal(function ($ax) {
         if(message == 'toggleSelectWidgetNote') {
             if(lastSelectedWidgetNote == data) {
                 $('#' + lastSelectedWidgetNote).removeClass('widgetNoteSelected');
+                lastSelectedWidgetNote = null;
                 return;
             }
 

@@ -232,3 +232,9 @@ div.annnotelabel {
     /*border: 3px solid #3915d6;*/
     /*margin: -3px;*/
 }
+
+
+.singleImg {
+    display: none;
+    visibility: hidden;
+}

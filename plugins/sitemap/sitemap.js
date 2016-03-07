@@ -21,8 +21,6 @@ function openPreviousPage() {
     var SHOW_HIDE_ANIMATION_DURATION = 0;
 
     var HIGHLIGHT_INTERACTIVE_VAR_NAME = 'hi';
-    //var FOOTNOTES_VAR_NAME = 'fn';
-    var SITEMAP_COLLAPSE_VAR_NAME = 'c';
     var ADAPTIVE_VIEW_VAR_NAME = 'view';
 
     var currentPageLoc = '';
@@ -53,7 +51,7 @@ function openPreviousPage() {
         $('.sitemapLinkField').click(function() { this.select(); });
         $('input[value="withoutmap"]').click(withoutSitemapRadio_click);
         $('input[value="withmap"]').click(withSitemapRadio_click);
-        $('#minimizeBox, #footnotesBox, #highlightBox').change(sitemapUrlOptions_change);
+        $('#minimizeBox, #collapseBox, #footnotesBox, #highlightBox').change(sitemapUrlOptions_change);
         $('#viewSelect').change(sitemapUrlViewSelect_change);
 
         $(document).on('ContainerHeightChange', function() {
@@ -117,11 +115,7 @@ function openPreviousPage() {
         $viewSelect.append('<option value="auto">Auto</option>');
         if(typeof $axure.document.defaultAdaptiveView.name != 'undefined') {
             //If the name is a blank string, make the view name the width if non-zero, else 'any'
-            var defaultViewName = $axure.document.defaultAdaptiveView.name;
-            if(defaultViewName == '') {
-                defaultViewName = $axure.document.defaultAdaptiveView.size.width != 0 ? $axure.document.defaultAdaptiveView.size.width : 'Base';
-            }
-
+            var defaultViewName = $axure.document.defaultAdaptiveView.name;            
             $adaptiveViewsContainer.append('<div class="adaptiveViewOption currentAdaptiveView" val="default"><div class="adaptiveCheckboxDiv"></div>' + defaultViewName + '</div>');
             $viewSelect.append('<option value="default">' + defaultViewName + '</option>');
         }
@@ -329,6 +323,7 @@ function openPreviousPage() {
         $('#sitemapLinkWithPlayer').val(currentPageLoc);
         $('#sitemapOptionsDiv').hide();
         $('#minimizeBox').attr('disabled', 'disabled');
+        $('#collapseBox').attr('disabled', 'disabled');
         $('#footnotesBox').attr('disabled', 'disabled');
         $('#highlightBox').attr('disabled', 'disabled');
         $('#viewSelect').attr('disabled', 'disabled');
@@ -340,6 +335,7 @@ function openPreviousPage() {
     function withSitemapRadio_click() {
         $('#sitemapLinkWithPlayer').val(currentPlayerLoc + currentPageHashString);
         $('#minimizeBox').removeAttr('disabled').change();
+        $('#collapseBox').removeAttr('disabled').change();
         $('#footnotesBox').removeAttr('disabled').change();
         $('#highlightBox').removeAttr('disabled').change();
         $('#viewSelect').removeAttr('disabled').change();
@@ -356,6 +352,9 @@ function openPreviousPage() {
         var defVal = 1;
         if($(this).is('#minimizeBox')) {
             varName = SITEMAP_COLLAPSE_VAR_NAME;
+        } else if($(this).is('#collapseBox')) {
+            varName = PLUGIN_VAR_NAME;
+            defVal = 0;
         } else if($(this).is('#footnotesBox')) {
             varName = FOOTNOTES_VAR_NAME;
             defVal = 0;
@@ -416,6 +415,7 @@ function openPreviousPage() {
 
         treeUl += "<div id='sitemapOptionsDiv'>";
         treeUl += "<div class='sitemapUrlOption'><label><input type='checkbox' id='minimizeBox' />Minimize sidebar</label></div>";
+        treeUl += "<div class='sitemapUrlOption'><label><input type='checkbox' id='collapseBox' />Pages closed</label></div>";
         if($axure.document.configuration.showAnnotations == true) {
             treeUl += "<div class='sitemapUrlOption'><label><input type='checkbox' id='footnotesBox' />Hide footnotes</label></div>";
         }

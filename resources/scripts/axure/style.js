@@ -196,6 +196,8 @@
                 $("[selectiongroup='" + group + "']").each(function() {
                     var otherId = this.id;
                     if(otherId == id) return;
+                    if ($ax.visibility.isScriptIdLimbo($ax.repeater.getScriptIdFromElementId(otherId))) return;
+
                     $ax.style.SetWidgetSelected(otherId, false);
                 });
             }
@@ -676,40 +678,40 @@
 
     var ALL_STATES = ['mouseOver', 'mouseDown', 'selected', 'disabled'];
     var _applyImage = $ax.style.applyImage = function (id, imgUrl, state) {
-
-        var object = $obj(id);
-        if (object.generateCompound) {
-            for (var i = 0; i < object.compoundChildren.length; i++) {
-                var componentId = object.compoundChildren[i];
-                var childId = $ax.public.fn.getComponentId(id, componentId);
-                var childImgQuery = $jobj(childId + '_img');
-                var childQuery = $jobj(childId);
-                childImgQuery.attr('src', imgUrl[componentId]);
-                for (var j = 0; j < ALL_STATES.length; j++) {
-                    childImgQuery.removeClass(ALL_STATES[j]);
-                    childQuery.removeClass(ALL_STATES[j]);
+            var object = $obj(id);
+            if (object.generateCompound) {
+                for (var i = 0; i < object.compoundChildren.length; i++) {
+                    var componentId = object.compoundChildren[i];
+                    var childId = $ax.public.fn.getComponentId(id, componentId);
+                    var childImgQuery = $jobj(childId + '_img');
+                    var childQuery = $jobj(childId);
+                    childImgQuery.attr('src', imgUrl[componentId]);
+                    for (var j = 0; j < ALL_STATES.length; j++) {
+                        childImgQuery.removeClass(ALL_STATES[j]);
+                        childQuery.removeClass(ALL_STATES[j]);
+                    }
+                    if (state != 'normal') {
+                        childImgQuery.addClass(state);
+                        childQuery.addClass(state);
+                    }
+                }
+            } else {
+                var imgQuery = $jobj($ax.style.GetImageIdFromShape(id));
+                var idQuery = $jobj(id);
+                //it is hard to tell if setting the image or the class first causing less flashing when adding shadows.
+                imgQuery.attr('src', imgUrl);
+                for (var i = 0; i < ALL_STATES.length; i++) {
+                    idQuery.removeClass(ALL_STATES[i]);
+                    imgQuery.removeClass(ALL_STATES[i]);
                 }
                 if (state != 'normal') {
-                    childImgQuery.addClass(state);
-                    childQuery.addClass(state);
+                    idQuery.addClass(state);
+                    imgQuery.addClass(state);
                 }
+                if (imgQuery.parents('a.basiclink').length > 0) imgQuery.css('border', 'none');
+                if (imgUrl.indexOf(".png") > -1) $ax.utils.fixPng(imgQuery[0]);
             }
-        } else {
-            var imgQuery = $jobj($ax.style.GetImageIdFromShape(id));
-            var idQuery = $jobj(id);
-            //it is hard to tell if setting the image or the class first causing less flashing when adding shadows.
-            imgQuery.attr('src', imgUrl);
-            for (var i = 0; i < ALL_STATES.length; i++) {
-                idQuery.removeClass(ALL_STATES[i]);
-                imgQuery.removeClass(ALL_STATES[i]);
-            }
-            if (state != 'normal') {
-                idQuery.addClass(state);
-                imgQuery.addClass(state);
-            }
-            if (imgQuery.parents('a.basiclink').length > 0) imgQuery.css('border', 'none');
-            if (imgUrl.indexOf(".png") > -1) $ax.utils.fixPng(imgQuery[0]);
-        }
+
     };
 
     $ax.public.fn.getComponentId = function (id, componentId) {
@@ -838,56 +840,45 @@
 
             isConnector = parentObj.type == $ax.constants.CONNECTOR_TYPE;
         }
-        if(isConnector) return;
+        if (isConnector) return;
 
-        var isCompoundVector = $ax.public.fn.isCompoundVectorHtml(textObjParent[0]);
+        var axTextObjectParent = $ax('#' + textObjParent.attr('id'));
 
         var oldWidth = $ax.getNumFromPx(textObj.css('width'));
         var oldLeft = $ax.getNumFromPx(textObj.css('left'));
         var oldTop = $ax.getNumFromPx(textObj.css('top'));
 
-        var widgetWidth, widgetHeight;
         var newTop = 0;
         var newLeft = 0.0;
 
-        if(isCompoundVector) {
-            var corners = $ax.public.fn.getFourCorners(textObjParent);
-            var horizontal = $ax.public.fn.vectorMinus(corners.widgetTopRight, corners.widgetTopLeft);
-            var vertical = $ax.public.fn.vectorMinus(corners.widgetBottomLeft, corners.widgetTopLeft);
-            widgetWidth = $ax.public.fn.l2(horizontal.x, horizontal.y);
-            widgetHeight = $ax.public.fn.l2(vertical.x, vertical.y);
-            var relativeHorizontal, relativeVertical;
+        var width = axTextObjectParent.width();
+        var height = axTextObjectParent.height();
 
-            if (vAlign == "middle") relativeVertical = _roundToEven((widgetHeight + paddingTop - paddingBottom) / 2.0) / widgetHeight;
-            else if (vAlign == "bottom") relativeVertical = _roundToEven(widgetHeight - paddingBottom - textHeight / 2.0) / widgetHeight;
-            else relativeVertical = _roundToEven(paddingTop + textHeight / 2.0) / widgetHeight;
-            
-            relativeHorizontal = (widgetWidth + paddingLeft - paddingRight) / (2.0 * widgetWidth);
-            newLeft = corners.widgetTopLeft.x + horizontal.x * relativeHorizontal + vertical.x * relativeVertical - oldWidth / 2.0;
-            newTop = corners.widgetTopLeft.y + horizontal.y * relativeHorizontal + vertical.y * relativeVertical - textHeight / 2.0;
-        } else {
-            widgetWidth = textObjParent.width();
-            var relativeTop = 0.0;
-            var height = textObjParent.height();
-            relativeTop = height * topParam;
-            var containerHeight = height * bottomParam - relativeTop;
+        // If text rotated need to handle getting the correct width for text based on bounding rect of rotated parent.
+        var boundingRotation = -$ax.move.getRotationDegree(textId);
+        var boundingParent = $axure.fn.getBoundingSizeForRotate(width, height, boundingRotation);
+        var extraLeftPadding = (width - boundingParent.width) / 2;
+        width = boundingParent.width;
+        var relativeTop = 0.0;
+        relativeTop = height * topParam;
+        var containerHeight = height * bottomParam - relativeTop;
 
-            if (vAlign == "middle") newTop = _roundToEven(relativeTop + (containerHeight - textHeight + paddingTop - paddingBottom) / 2);
-            else if (vAlign == "bottom") newTop = _roundToEven(relativeTop + containerHeight - textHeight - paddingBottom);
-            else newTop = _roundToEven(paddingTop + relativeTop);
+        if (vAlign == "middle") newTop = _roundToEven(relativeTop + (containerHeight - textHeight + paddingTop - paddingBottom) / 2);
+        else if (vAlign == "bottom") newTop = _roundToEven(relativeTop + containerHeight - textHeight - paddingBottom);
+        else newTop = _roundToEven(paddingTop + relativeTop);
 
-            newLeft = paddingLeft + widgetWidth * leftParam;
-        }
-        var newWidth = widgetWidth * (rightParam - leftParam) - paddingLeft - paddingRight;
+        newLeft = paddingLeft + extraLeftPadding + width * leftParam;
+
+        var newWidth = width * (rightParam - leftParam) - paddingLeft - paddingRight;
         var vertChange = oldTop != newTop;
         if (vertChange) textObj.css('top', newTop + 'px');
 
         var horizChange = newWidth != oldWidth || newLeft != oldLeft;
         if (horizChange) {
             textObj.css('left', newLeft);
-            textObj.width('width', newWidth);
+            textObj.width(newWidth);
         }
-        if ((vertChange || horizChange) && !isCompoundVector) _updateTransformOrigin(textId);
+        if ((vertChange || horizChange)) _updateTransformOrigin(textId);
     };
 
     var _updateTransformOrigin = function(textId) {
@@ -907,6 +898,24 @@
             textObj.css('transform-origin', newOrigin);
         }
     };
+
+    $ax.style.reselectElements = function() {
+        for(var id in _selectedWidgets) {
+            // Only looking for the selected widgets that don't have their class set
+            if(!_selectedWidgets[id] || $jobj(id).hasClass('selected')) continue;
+
+            $jobj(id).addClass('selected');
+            _applyImageAndTextJson(id, $ax.style.generateState(id));
+        }
+
+        for(id in _disabledWidgets) {
+            // Only looking for the disabled widgets that don't have their class yet
+            if (!_disabledWidgets[id] || $jobj(id).hasClass('disabled')) continue;
+
+            $jobj(id).addClass('disabled');
+            _applyImageAndTextJson(id, $ax.style.generateState(id));
+        }
+    }
 
     $ax.style.clearAdaptiveStyles = function() {
         for(var shapeId in _adaptiveStyledWidgets) {
@@ -1017,7 +1026,7 @@
         color.g = val % 256;
         val = Math.floor(val / 256);
         color.r = val % 256;
-        color.a = fill.opacity || 1;
+        color.a = typeof (fill.opacity) == 'number' ? fill.opacity : 1;
         return _getCssColor(color);
     };
 

@@ -142,6 +142,8 @@
     }
 
     var _queueResizeMove = function (id, type, eventInfo, actionInfo) {
+        if (type == queueTypes.resize || type == queueTypes.rotate) $ax.public.fn.convertToSingleImage($jobj(id));
+        
         var idToResizeMoveState = _getIdToResizeMoveState(eventInfo);
         if(!idToResizeMoveState[id]) {
             idToResizeMoveState[id] = {};
@@ -254,6 +256,14 @@
 
             // Resize is used by default, then rotate
             if(resizeInfo) {
+                // Check for instant resize
+                if(!resizeInfo.duration || resizeInfo.easing == 'none') {
+                    _addResize(id, resize.queue[0].eventInfo, resizeInfo, { easing: 'none', duration: 0, stop: { instant: true } });
+                    _updateResizeMoveUsed(id, queueTypes.resize, 0, idToResizeMoveState);
+                    resizeInfo = resize.queue[0];
+                    continue;
+                }
+
                 var duration = resizeInfo.duration - resize.used;
                 if(moveInfo) duration = Math.min(duration, moveInfo.options.duration - move.used);
                 if(rotateInfo) duration = Math.min(duration, rotateInfo.options.duration - rotate.used);
@@ -277,7 +287,15 @@
                     _updateResizeMoveUsed(id, queueTypes.move, duration, idToResizeMoveState);
                     moveInfo = move.queue[0];
                 }
-            } else if(rotateInfo) {
+            } else if (rotateInfo) {
+                // Check for instant rotate
+                if(!rotateInfo.options.duration || rotateInfo.options.easing == 'none') {
+                    _addRotate(id, rotate.queue[0].eventInfo, rotateInfo, { easing: 'none', duration: 0, stop: { instant: true } });
+                    _updateResizeMoveUsed(id, queueTypes.rotate, 0, idToResizeMoveState);
+                    rotateInfo = rotate.queue[0];
+                    continue;
+                }
+
                 duration = rotateInfo.options.duration - rotate.used;
                 if(moveInfo) duration = Math.min(duration, moveInfo.options.duration - move.used);
 
@@ -296,6 +314,13 @@
                     moveInfo = move.queue[0];
                 }
             } else {
+                if(!moveInfo.options.duration || moveInfo.options.easing == 'none') {
+                    _addMove(id, eventInfo, moveInfo, { easing: 'none', duration: 0, stop: { instant: true } });
+                    _updateResizeMoveUsed(id, queueTypes.move, 0, idToResizeMoveState);
+                    moveInfo = move.queue[0];
+                    continue;
+                }
+
                 duration = moveInfo.options.duration - move.used;
                 options = { easing: moveInfo.options.easing, duration: duration };
                 options.stop = { start: move.used, end: moveInfo.options.duration, len: moveInfo.options.duration };
@@ -312,7 +337,8 @@
         state.used += duration;
         var options = state.queue[0].actionInfo;
         if(options.options) options = options.options;
-        if(options.duration <= state.used) {
+        var optionDur = options.duration || 0;
+        if(optionDur <= state.used) {
             $ax.splice(state.queue, 0, 1);
             state.used = 0;
         }
@@ -593,7 +619,10 @@
 
                 (function(elementId, opacityInfo) {
                     _addAnimation(elementId, queueTypes.fade, function () {
+                        var oldTarget = eventInfo.targetElement;
+                        eventInfo.targetElement = elementId;
                         var opacity = $ax.expr.evaluateExpr(opacityInfo.opacity, eventInfo);
+                        eventInfo.targetElement = oldTarget;
                         opacity = Math.min(100, Math.max(0, opacity));
                         $ax('#' + elementId).setOpacity(opacity/100, opacityInfo.easing, opacityInfo.duration);
                     })
@@ -711,12 +740,14 @@
         var css = {};
         css[xProp] = xDiff + delta.x;
         css[yProp] = yDiff + delta.y;
+        var moveInfo = $ax.move.RegisterMoveInfo(elementId, delta.x, delta.y,false, options);
         $jobj(elementId).animate(css, {
             duration: options.duration,
             easing: options.easing,
             queue: false,
             complete: function () {
                 if(onComplete) onComplete();
+                if(moveInfo.rootLayer) $ax.visibility.popContainer(moveInfo.rootLayer, false);
                 $ax.action.fireAnimationFromQueue(elementId, $ax.action.queueTypes.move);
             }
         });
@@ -754,13 +785,13 @@
             if (layerInfo) {
                 startX = layerInfo.left;
                 startY = layerInfo.top;
-            } else if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
-                var dimensions = $ax.public.fn.compoundWidgetDimensions(jobj);
-                startX = dimensions.left;
-                startY = dimensions.top;
+            //} else if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
+            //    var dimensions = $ax.public.fn.compoundWidgetDimensions(jobj);
+            //    startX = dimensions.left;
+            //    startY = dimensions.top;
             } else {
-                startX = $ax.getNumFromPx(jobj.css('left'));
-                startY = $ax.getNumFromPx(jobj.css('top'));
+                startX = $ax('#' + elementId).locRelativeIgnoreLayer(false);
+                startY = $ax('#' + elementId).locRelativeIgnoreLayer(true);
             }
 
             xValue = (xValue - startX) * toRatio;
@@ -818,7 +849,9 @@
             break;
         }
 
-        if(options && options.boundaryExpr) {
+        if (options && options.boundaryExpr) {
+            //$ax.public.fn.removeCompound(jobj);
+
             if(moveWithThis && (xValue || yValue)) {
                 _updateLeftExprVariable(options.boundaryExpr, xValue.toString(), yValue.toString());
             }
@@ -854,6 +887,8 @@
                     }
                 }
             }
+
+            //$ax.public.fn.restoreCompound(jobj);
         }
 
         return { x: Number(xValue), y: Number(yValue), moveTo: moveTo };
@@ -903,7 +938,7 @@
         rotateInfo.options.duration = options.duration;
 
         //calculate degree value at start of animation
-        var rotateDegree, moves;
+        var rotateDegree;
         var offset = {};
         var eval = function(boundingRect) {
             var oldTarget = eventInfo.targetElement;
@@ -915,7 +950,6 @@
             if(!rotateInfo.options.clockwise) rotateDegree = -rotateDegree;
 
             _updateOffset(offset, rotateInfo.anchor, boundingRect);
-            moves = moveInfo || offset.x != 0 || offset.y != 0;
         }
 
         if (moveInfo) var moveOptions = { dragInfo: eventInfo.dragInfo, duration: options.duration, easing: options.easing };
@@ -969,7 +1003,7 @@
                             else $ax('#' + id).circularMoveAndRotate(degreeDelta, options, centerPoint.x, centerPoint.y, rotate, moveDelta);
                         }
                     });
-                    if(!isLayer && !childObj.generateCompound) animations.push({ id: id, type: queueTypes.move, func: function() {} });
+                    if(!isLayer) animations.push({ id: id, type: queueTypes.move, func: function() {} });
                 })(childId);
             }
 
@@ -988,19 +1022,20 @@
                             delta.x -= $ax.getNumFromPx($jobj(elementId).css('left'));
                             delta.y -= $ax.getNumFromPx($jobj(elementId).css('top'));
                         }
-                        $ax.event.raiseSyntheticEvent(elementId, 'onMove');
                     }
 
                     $ax.event.raiseSyntheticEvent(elementId, 'onRotate');
-                    if (offset.x == 0 && offset.y == 0 && !obj.generateCompound) {
+                    if(offset.x == 0 && offset.y == 0) {
                         _rotateSingle(elementId, rotateDegree, rotateInfo.rotateType == 'location', delta, options);
                         _fireAnimationFromQueue(elementId, queueTypes.move);
+                        if(moveInfo) $ax.event.raiseSyntheticEvent(elementId, 'onMove');
                         return;
                     }
                     _rotateSingleOffset(elementId, rotateDegree, rotateInfo.rotateType == 'location', delta, { x: offset.x, y: offset.y }, options, options.stop);
+                    if(moveInfo) $ax.event.raiseSyntheticEvent(elementId, 'onMove');
                 }
             });
-            if(moves) animations.push({ id: elementId, type: queueTypes.move, func: function () { } });
+            animations.push({ id: elementId, type: queueTypes.move, func: function () { } });
 
             _addAnimations(animations);
         }
@@ -1023,7 +1058,6 @@
         var obj = $obj(elementId);
         var degreeDelta;
         if(!rotateTo) degreeDelta = rotateDegree;
-        else if (obj.generateCompound) degreeDelta = rotateDegree - _getCompoundImageRotation($jobj(elementId));
         else degreeDelta = rotateDegree - $ax.move.getRotationDegree(elementId);
 
         var ratio = stop.instant ? 1 : (stop.end - stop.start) / (stop.len - stop.start);
@@ -1032,11 +1066,6 @@
         
         var rotate = $.inArray(obj.type, widgetRotationFilter) != -1;
         $ax('#' + elementId).circularMoveAndRotate(degreeDelta, options, widgetCenter.x + offset.x, widgetCenter.y + offset.y, rotate, delta, resizeOffset);
-    }
-
-    var _getCompoundImageRotation = function (query) {
-        var fourCorners = $ax.public.fn.getFourCorners(query);
-        return Math.atan2(fourCorners.widgetTopRight.y - fourCorners.widgetTopLeft.y, fourCorners.widgetTopRight.x - fourCorners.widgetTopLeft.x) * (180 / Math.PI);
     }
 
 
@@ -1167,10 +1196,11 @@
                         id: childId,
                         type: queueTypes.resize,
                         func: function() {
-                            $ax.event.raiseSyntheticEvent(childId, 'onResize');
+                            //$ax.event.raiseSyntheticEvent(childId, 'onResize');
                             if(isLayer) {
                                 completeCount--;
                                 _fireAnimationFromQueue(childId, queueTypes.resize);
+                                $ax.event.raiseSyntheticEvent(childId, 'onResize');
                             } else {
                                 var currDeltaLoc = { x: deltaLoc.x, y: deltaLoc.y };
                                 var resizeDeltaMove = { x: 0, y: 0 };
@@ -1196,77 +1226,6 @@
                     if(!isLayer && rotateInfo) animations.push({ id: childId, type: queueTypes.rotate, func: function () {} });
                 })(childrenIds[idIndex]);
             }
-        } else if(axObject.generateCompound) {
-            animations.push({
-                id: elementId,
-                type: queueTypes.resize,
-                func: function() {
-                    //textarea can be resized manully by the user, but doesn't update div size yet, so doing this for now.
-                    //alternatively axquery get for size can account for this
-                    var jobj = $jobj(elementId);
-                    var fourCorners = $ax.public.fn.getFourCorners(jobj);
-                    var basis = $ax.public.fn.fourCornersToBasis(fourCorners);
-                    var oldWidth = $ax.public.fn.l2(basis.widthVector.x, basis.widthVector.y);
-                    var oldHeight = $ax.public.fn.l2(basis.heightVector.x, basis.heightVector.y);
-                    var size = _getSizeFromInfo(resizeInfo, eventInfo, oldHeight, oldWidth, elementId);
-                    var newWidth = size.width;
-                    var newHeight = size.height;
-                    var stop = options.stop;
-                    var ratio = stop.instant ? 1 : (stop.end -stop.start) / (stop.len -stop.start);
-                    var deltaWidth = (newWidth -oldWidth) *ratio;
-                    var deltaHeight = (newHeight - oldHeight) *ratio;
-                    newWidth = oldWidth +deltaWidth;
-                    newHeight = oldHeight +deltaHeight;
-                    if(stop.instant || stop.end == stop.len) idToResizeMoveState[elementId].resizeResult = undefined;
-
-                    var delta = { x: 0, y: 0 };
-                    if(moveInfo) {
-                        delta = _getMoveLoc(elementId, moveInfo, eventInfo, options.moveStop, idToResizeMoveState[elementId], moveOptions);
-                        if (delta.moveTo) {
-                            delta.x -= $ax.getNumFromPx($jobj(elementId).css('left'));
-                            delta.y -= $ax.getNumFromPx($jobj(elementId).css('top'));
-                        }
-                    }
-
-                    var offset = { x: 0, y: 0 };
-                    if(rotateInfo) {
-                        offset.x = Number($ax.expr.evaluateExpr(rotateInfo.offsetX, eventInfo));
-                        offset.y = Number($ax.expr.evaluateExpr(rotateInfo.offsetY, eventInfo));
-                        _updateOffset(offset, rotateInfo.anchor, $axure.fn.getWidgetBoundingRect(elementId));
-                    }
-
-                    if(rotateInfo) {
-                        var rotateDegree = parseFloat($ax.expr.evaluateExpr(rotateInfo.degree, eventInfo));
-
-                        var resizeOffset = _applyAnchorToResizeOffset(deltaWidth, deltaHeight, rotateInfo.anchor);
-                        _rotateSingleOffset(elementId, rotateDegree, rotateInfo.rotateType == 'location', delta, offset, options, options.rotateStop, resizeOffset);
-                    }
-
-
-                    if (Math.abs(delta.x) < 0.01 && Math.abs(delta.y) < 0.01 && Math.abs(newHeight - oldHeight) < 0.01 && Math.abs(newWidth - oldWidth) < 0.01) {
-                        idToResizeMoveState[elementId].resizeResult = undefined;
-                        _fireAnimationFromQueue(elementId, queueTypes.resize);
-                        if(moves) _fireAnimationFromQueue(elementId, queueTypes.move);
-                        return;
-                    }
-
-
-                    var css = {
-                        invariant: $ax.public.fn.vectorMidpoint(fourCorners.widgetTopLeft, fourCorners.widgetBottomRight),
-                        fourCorners: fourCorners,
-                        widthRatio: newWidth / oldWidth,
-                        heightRatio: newHeight / oldHeight,
-                        delta: delta,
-                        anchor: resizeInfo.anchor
-                    }
-                    // TODO: what if any of these numbers is 0?
-                    $ax.event.raiseSyntheticEvent(elementId, 'onResize');
-                    $ax('#' + elementId).resize(css, resizeInfo, true, moves);
-                }
-            });
-
-            // Nop move (move handled by resize)
-            if(moves) animations.push({ id: elementId, type: queueTypes.move, func: function() {} });
         } else {
             // Not func, obj with func
             animations.push({
@@ -1299,7 +1258,6 @@
                             delta.x -= $ax.getNumFromPx($jobj(elementId).css('left'));
                             delta.y -= $ax.getNumFromPx($jobj(elementId).css('top'));
                         }
-                        $ax.event.raiseSyntheticEvent(elementId, 'onMove');
                     }
 
                     var rotateHandlesMove = false;
@@ -1331,11 +1289,16 @@
                         }
                     } else _moveSingleWidget(elementId, delta, options);
 
-                    $ax.event.raiseSyntheticEvent(elementId, 'onResize');
+                    // Have to do it down here to make sure move info is registered
+                    if(moveInfo) $ax.event.raiseSyntheticEvent(elementId, 'onMove');
+
+                    //$ax.event.raiseSyntheticEvent(elementId, 'onResize');
                     if(css) $ax('#' + elementId).resize(css, resizeInfo, true, moves);
                     else {
                         _fireAnimationFromQueue(elementId, queueTypes.resize);
                         if (moves) _fireAnimationFromQueue(elementId, queueTypes.move);
+
+                        $ax.event.raiseSyntheticEvent(elementId, 'onResize');
                     }
                 }
             });
@@ -1401,22 +1364,22 @@
         return result;
     }
 
-    var _queueResize = function (elementId, css, resizeInfo) {
-        var resizeFunc = function() {
-            $ax('#' + elementId).resize(css, resizeInfo, true);
-            //$ax.public.fn.resize(elementId, css, resizeInfo, true);
-        };
-        var obj = $obj(elementId);
-        var moves = resizeInfo.anchor != "top left" || ($ax.public.fn.IsDynamicPanel(obj.type) && ((obj.fixedHorizontal && obj.fixedHorizontal == 'center') || (obj.fixedVertical && obj.fixedVertical == 'middle')))
-        if(!moves) {
-            _addAnimation(elementId, queueTypes.resize, resizeFunc);
-        } else {
-            var animations = [];
-            animations[0] = { id: elementId, type: queueTypes.resize, func: resizeFunc };
-            animations[1] = { id: elementId, type: queueTypes.move, func: function() {}}; // Nop func - resize handles move and firing from queue
-            _addAnimations(animations);
-        }
-    };
+    //var _queueResize = function (elementId, css, resizeInfo) {
+    //    var resizeFunc = function() {
+    //        $ax('#' + elementId).resize(css, resizeInfo, true);
+    //        //$ax.public.fn.resize(elementId, css, resizeInfo, true);
+    //    };
+    //    var obj = $obj(elementId);
+    //    var moves = resizeInfo.anchor != "top left" || ($ax.public.fn.IsDynamicPanel(obj.type) && ((obj.fixedHorizontal && obj.fixedHorizontal == 'center') || (obj.fixedVertical && obj.fixedVertical == 'middle')))
+    //    if(!moves) {
+    //        _addAnimation(elementId, queueTypes.resize, resizeFunc);
+    //    } else {
+    //        var animations = [];
+    //        animations[0] = { id: elementId, type: queueTypes.resize, func: resizeFunc };
+    //        animations[1] = { id: elementId, type: queueTypes.move, func: function() {}}; // Nop func - resize handles move and firing from queue
+    //        _addAnimations(animations);
+    //    }
+    //};
 
     //should clean this function and 
     var _getCssForResizingWidget = function (elementId, eventInfo, anchor, newWidth, newHeight, oldWidth, oldHeight, delta, stop, handleMove) {

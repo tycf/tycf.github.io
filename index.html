@@ -60,6 +60,8 @@
 
     </style>
     <script type="text/javascript" language="JavaScript"><!--
+        var SITEMAP_COLLAPSE_VAR_NAME = 'c';
+        var PLUGIN_VAR_NAME = 'g';
         var FOOTNOTES_VAR_NAME = 'fn';
         var lastLeftPanelWidth = 305;
         var toolBarOnly = true;
@@ -73,10 +75,11 @@
             _settings.projectId = configuration.prototypeId;
             _settings.isAxshare = configuration.isAxshare;
             _settings.loadFeedbackPlugin = configuration.loadFeedbackPlugin;
-            var cHash = getHashStringVar("c");
+            var cHash = getHashStringVar(SITEMAP_COLLAPSE_VAR_NAME);
             _settings.startCollapsed = cHash == "1";
             if(cHash == "2") closePlayer();
-            var gHash = getHashStringVar("g");
+            var gHash = getHashStringVar(PLUGIN_VAR_NAME);
+            if(gHash == "") gHash = 1;
             _settings.startPluginGid = gHash;
 
             $axure.player.settings = _settings;

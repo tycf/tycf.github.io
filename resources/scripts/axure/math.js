@@ -91,15 +91,13 @@
         if (!element) return emptyRect;
 
         var object = $obj(widgetId);
-        if (object && object.type && $ax.public.fn.IsLayer(object.type) && !_isCompoundVectorComponentHtml(element)) {
+        if (object && object.type && $ax.public.fn.IsLayer(object.type)) {
             var layerChildren = _getLayerChildrenDeep(widgetId);
             if (!layerChildren) return emptyRect;
             else return _getBoundingRectForMultipleWidgets(layerChildren);
         }
         return _getBoundingRectForSingleWidget(widgetId);
     };
-
-    var _isCompoundVectorComponentHtml = $ax.public.fn.isCompoundVectorComponentHtml = function (hElement) { return hElement.hasAttribute('widgettopleftx'); }
 
     var _getLayerChildrenDeep = $ax.public.fn.getLayerChildrenDeep = function (layerId, includeLayers, includeHidden) {
         var deep = [];
@@ -137,55 +135,70 @@
     };
 
     var _getBoundingRectForSingleWidget = function (widgetId, relativeToPage, justSides) {
-        var xOffset = window.pageXOffset || document.documentElement.scrollLeft;
-        var yOffset = window.pageYOffset || document.documentElement.scrollTop;
-
         var element = document.getElementById(widgetId);
         var boundingRect, tempBoundingRect, position;
         var displayChanged = _displayHackStart(element);
 
-        if(_isCompoundVectorHtml(element)) {
-            tempBoundingRect =  _getCompoundImageBoundingClientSize(widgetId);
-            position = { left: tempBoundingRect.left, top: tempBoundingRect.top };
+        if (_isCompoundVectorHtml(element)) {
+            //tempBoundingRect =  _getCompoundImageBoundingClientSize(widgetId);
+            //position = { left: tempBoundingRect.left, top: tempBoundingRect.top };
+            position = $(element).position();
+            tempBoundingRect = {};
+            tempBoundingRect.left = position.left; //= _getCompoundImageBoundingClientSize(widgetId);
+            tempBoundingRect.top = position.top;
+            tempBoundingRect.width = Number(element.getAttribute('WidgetWidth'));
+            tempBoundingRect.height = Number(element.getAttribute('WidgetHeight'));
         } else {
             tempBoundingRect = element.getBoundingClientRect();
             position = $(element).position();
         }
-        if(!relativeToPage) {
-            // Check for flip. If so, first correct any layer weirdness going on, then account for flip of actual widget
-            var layers = $ax('#' + widgetId).getParents(true, ['layer'])[0];
-            var flip = '';
-            var mirrorWidth = 0;
-            var mirrorHeight = 0;
-            for (var i = 0; i < layers.length; i++) {
-                var layerPos = $jobj(layers[i]).position();
-                position.left += layerPos.left;
-                position.top += layerPos.top;
 
-                var outer = $ax.visibility.applyWidgetContainer(layers[i], true, true);
-                if(outer.length) {
-                    var outerPos = outer.position();
-                    position.left += outerPos.left;
-                    position.top += outerPos.top;
-                }
+        var layers = $ax('#' + widgetId).getParents(true, ['layer'])[0];
+        var flip = '';
+        var mirrorWidth = 0;
+        var mirrorHeight = 0;
+        for (var i = 0; i < layers.length; i++) {
 
-                var inner = $jobj(layers[i] + '_container_inner');
-                if(inner.length) {
-                    flip = inner.data('flip');
+            //should always be 0,0
+            var layerPos = $jobj(layers[i]).position();
+            position.left += layerPos.left;
+            position.top += layerPos.top;
+
+            var outer = $ax.visibility.applyWidgetContainer(layers[i], true, true);
+            if (outer.length) {
+                var outerPos = outer.position();
+                position.left += outerPos.left;
+                position.top += outerPos.top;
+            }
+
+            //when a group is flipped we find the unflipped position
+            var inner = $jobj(layers[i] + '_container_inner');
+            var taggedFlip = inner.data('flip');
+            if (inner.length && taggedFlip) {
+                //only account for flip if transform is applied
+                var matrix = taggedFlip && (inner.css("-webkit-transform") || inner.css("-moz-transform") ||
+                            inner.css("-ms-transform") || inner.css("-o-transform") || inner.css("transform"));
+                if (matrix !== 'none') {
+                    flip = taggedFlip;
                     mirrorWidth = $ax.getNumFromPx(inner.css('width'));
                     mirrorHeight = $ax.getNumFromPx(inner.css('height'));
                 }
             }
-            // Now account for flip
+        }
+        // Now account for flip
+        if(_isCompoundVectorHtml(element)) {
+            if (flip == 'x') position.top = mirrorHeight - position.top;
+            else if (flip == 'y') position.left = mirrorWidth - position.left;
+        } else {
             if(flip == 'x') position.top = mirrorHeight - position.top - tempBoundingRect.height;
             else if(flip == 'y') position.left = mirrorWidth - position.left - tempBoundingRect.width;
         }
 
         boundingRect = {
-            left: relativeToPage ? tempBoundingRect.left + xOffset : position.left,
-            right: relativeToPage ? tempBoundingRect.right + xOffset : position.left + tempBoundingRect.width,
-            top: relativeToPage ? tempBoundingRect.top + yOffset : position.top,
-            bottom: relativeToPage ? tempBoundingRect.bottom + yOffset : position.top + tempBoundingRect.height
+            left: position.left,
+            right: position.left + tempBoundingRect.width,
+            top: position.top,
+            bottom: position.top + tempBoundingRect.height
         };
 
         _displayHackEnd(displayChanged);
@@ -202,6 +215,35 @@
         return boundingRect;
     };
 
+    var _getPointAfterRotate = $ax.public.fn.getPointAfterRotate = function (angleInDegrees, pointToRotate, centerPoint) {
+        var displacement = $ax.public.fn.vectorMinus(pointToRotate, centerPoint);
+        var rotationMatrix = $ax.public.fn.rotationMatrix(angleInDegrees);
+        rotationMatrix.tx = centerPoint.x;
+        rotationMatrix.ty = centerPoint.y;
+        return $ax.public.fn.matrixMultiply(rotationMatrix, displacement);
+    };
+
+    $ax.public.fn.getBoundingSizeForRotate = function(width, height, rotation) {
+        // point to rotate around doesn't matter since we just care about size, if location matter we need more args and location matters.
+
+        var origin = { x: 0, y: 0 };
+
+        var corner1 = { x: width, y: 0 };
+        var corner2 = { x: 0, y: height };
+        var corner3 = { x: width, y: height };
+
+        corner1 = _getPointAfterRotate(rotation, corner1, origin);
+        corner2 = _getPointAfterRotate(rotation, corner2, origin);
+        corner3 = _getPointAfterRotate(rotation, corner3, origin);
+
+        var left = Math.min(0, corner1.x, corner2.x, corner3.x);
+        var right = Math.max(0, corner1.x, corner2.x, corner3.x);
+        var top = Math.min(0, corner1.y, corner2.y, corner3.y);
+        var bottom = Math.max(0, corner1.y, corner2.y, corner3.y);
+
+        return { width: right - left, height: bottom - top };
+    }
+
     $ax.public.fn.getPositionRelativeToParent = function (elementId) {
         var element = document.getElementById(elementId);
         var list = _displayHackStart(element);
@@ -210,7 +252,7 @@
         return position;
     };
 
-    var _displayHackStart = function (element) {
+    var _displayHackStart = $ax.public.fn.displayHackStart = function (element) {
         // TODO: Options: 1) stop setting display none. Big change for this late in the game. 2) Implement our own bounding.
         // TODO:  3) Current method is look for any parents that are set to none, and and temporarily unblock. Don't like it, but it works.
         var parent = element;
@@ -227,12 +269,17 @@
         return displays;
     };
 
-    var _displayHackEnd = function (displayChangedList) {
+    var _displayHackEnd = $ax.public.fn.displayHackEnd = function (displayChangedList) {
         for (var i = 0; i < displayChangedList.length; i++) displayChangedList[i].style.display = 'none';
     };
 
 
-    var _isCompoundVectorHtml = $ax.public.fn.isCompoundVectorHtml = function (hElement) { return hElement.hasAttribute('widgetwidth'); }
+    var _isCompoundVectorHtml = $ax.public.fn.isCompoundVectorHtml = function(hElement) {
+        return hElement.hasAttribute('compoundmode') && hElement.getAttribute('compoundmode') == "true";
+    }
+
+    $ax.public.fn.removeCompound = function (jobj) { if(_isCompoundVectorHtml(jobj[0])) jobj.removeClass('compound'); }
+    $ax.public.fn.restoreCompound = function (jobj) { if (_isCompoundVectorHtml(jobj[0])) jobj.addClass('compound'); }
 
     $ax.public.fn.compoundIdFromComponent = function(id) {
 
@@ -245,115 +292,49 @@
 
     $ax.public.fn.l2 = function (x, y) { return Math.sqrt(x * x + y * y); }
 
-    var _getCompoundImageBoundingClientSize = function (elementId) {
-        var query = $jobj(elementId);
+    $ax.public.fn.convertToSingleImage = function (jobj) {
 
-        //if(query[0].style.visibility == 'hidden' || query[0].style.display == 'none') {
-        //    return {
-        //        width: 0,
-        //        height: 0,
-        //        left: 0,
-        //        right: 0,
-        //        top: 0,
-        //        bottom: 0in
-        //    };
-        //}
+        var widgetId = jobj[0].id;
+        var object = $obj(widgetId);
 
-        var fourCorners = _getFourCorners(query);
+        if ($ax.public.fn.IsLayer(object.type)) {
+            var recursiveChildren = _getLayerChildrenDeep(widgetId, true);
+            for (var j = 0; j < recursiveChildren.length; j++)
+                $ax.public.fn.convertToSingleImage($jobj(recursiveChildren[j]));
+            return;
+        }
 
-        var maxLeft = Math.min(fourCorners.widgetBottomRight.x, fourCorners.widgetTopRight.x, fourCorners.widgetBottomLeft.x, fourCorners.widgetTopLeft.x);
-        var maxRight = Math.max(fourCorners.widgetBottomRight.x, fourCorners.widgetTopRight.x, fourCorners.widgetBottomLeft.x, fourCorners.widgetTopLeft.x);
-        var maxTop = Math.min(fourCorners.widgetBottomRight.y, fourCorners.widgetTopRight.y, fourCorners.widgetBottomLeft.y, fourCorners.widgetTopLeft.y);
-        var maxBottom = Math.max(fourCorners.widgetBottomRight.y, fourCorners.widgetTopRight.y, fourCorners.widgetBottomLeft.y, fourCorners.widgetTopLeft.y);
-        return {
-            width: maxRight - maxLeft,
-            height: maxBottom - maxTop,
-            left: maxLeft,
-            right: maxRight,
-            top: maxTop,
-            bottom: maxBottom
-        };
+        //var layer = 
 
-    }
-
-    var _getFieldFromStyle = $ax.public.fn.GetFieldFromStyle = function (query, field) {
-        var raw = query[0].style[field];
-        if (!raw) raw = query.css(field);
-        return Number(raw.replace('px', ''));
-    }
+        if(!_isCompoundVectorHtml(jobj[0])) return;
 
 
-    var _getCornersFromComponent = $ax.public.fn.getCornersFromComponent = function (query) {
-        var matrix = $ax.public.fn.transformFromElement(query[0]);
-        var currentMatrix = { m11: matrix[0], m21: matrix[1], m12: matrix[2], m22: matrix[3], tx: matrix[4], ty: matrix[5] };
-        var dimensions = {};
-
-        dimensions.left = _getFieldFromStyle(query, 'left');
-        dimensions.top = _getFieldFromStyle(query, 'top');
-        dimensions.width = _getFieldFromStyle(query, 'width');
-        dimensions.height = _getFieldFromStyle(query, 'height');
-        //var transformMatrix1 = { m11: 1, m12: 0, m21: 0, m22: 1, tx: -invariant.x, ty: -invariant.y };
-        //var transformMatrix2 = { m11: 1, m12: 0, m21: 0, m22: 1, tx: 500, ty: 500 };
-
-        var halfWidth = dimensions.width * 0.5;
-        var halfHeight = dimensions.height * 0.5;
-        var preTransformTopLeft = { x: -halfWidth, y: -halfHeight };
-        var preTransformBottomLeft = { x: -halfWidth, y: halfHeight };
-        var preTransformTopRight = { x: halfWidth, y: -halfHeight };
-
-        return {
-            relativeTopLeft: $ax.public.fn.matrixMultiply(currentMatrix, preTransformTopLeft),
-            relativeBottomLeft: $ax.public.fn.matrixMultiply(currentMatrix, preTransformBottomLeft),
-            relativeTopRight: $ax.public.fn.matrixMultiply(currentMatrix, preTransformTopRight),
-            centerPoint: { x: dimensions.left + halfWidth, y: dimensions.top + halfHeight },
-            originalDimensions: dimensions,
-            transformShift: { x: matrix[4], y: matrix[5] }
+        $('#' + widgetId).removeClass("compound");
+        $('#' + widgetId + '_img').removeClass("singleImg");
+        jobj[0].setAttribute('compoundmode', 'false');
+        
+        var components = object.compoundChildren;
+        delete object.generateCompound;
+        for (var i = 0; i < components.length; i++) {
+            var componentJobj = $jobj($ax.public.fn.getComponentId(widgetId, components[i]));
+            componentJobj.css('display', 'none');
+            componentJobj.css('visibility', 'hidden');
         }
     }
 
-    var _getFourCorners = $ax.public.fn.getFourCorners = function (query) {
-        var childId = $ax.public.fn.getComponentId(query[0].id, 'p000');
-        var firstChildElement = document.getElementById(childId);
 
-        var ohLookTheresAContainerHere = { x: 0.0, y: 0.0 };
-
+    $ax.public.fn.getContainerDimensions = function(query) {
+        // returns undefined if no containers found.
+        var containerDimensions;
         for (var i = 0; i < query[0].children.length; i++) {
             var node = query[0].children[i];
             if (node.id.indexOf(query[0].id) >= 0 && node.id.indexOf('container') >= 0) {
-                ohLookTheresAContainerHere = {
-                    x: Number( node.style.left.replace('px', '')), y: Number(node.style.top.replace('px', ''))
-                };
+                containerDimensions = node.style;
             }
         }
-
-
-        var list = _displayHackStart(firstChildElement);
-        var thisElt = $jobj(childId);
-        var elementCorners = _getCornersFromComponent(thisElt);
-        _displayHackEnd(list);
-        var transformedWidth = $ax.public.fn.vectorMinus(elementCorners.relativeTopRight, elementCorners.relativeTopLeft);
-        var transformedHeight = $ax.public.fn.vectorMinus(elementCorners.relativeBottomLeft, elementCorners.relativeTopLeft);
-
-        var relativeToWorld = {
-            m11: transformedWidth.x,
-            m12: transformedHeight.x,
-            m21: transformedWidth.y,
-            m22: transformedHeight.y,
-            tx: elementCorners.centerPoint.x + elementCorners.transformShift.x + ohLookTheresAContainerHere.x,
-            ty: elementCorners.centerPoint.y + elementCorners.transformShift.y + ohLookTheresAContainerHere.y
-        }
-        var widgetBottomRightRotated = { x: Number(thisElt[0].getAttribute('widgetbottomrightx')), y: Number(thisElt[0].getAttribute('widgetbottomrighty')) };
-        var widgetTopRightRotated = { x: Number(thisElt[0].getAttribute('widgettoprightx')), y: Number(thisElt[0].getAttribute('widgettoprighty')) };
-        var widgetBottomLeftRotated = { x: Number(thisElt[0].getAttribute('widgetbottomleftx')), y: Number(thisElt[0].getAttribute('widgetbottomlefty')) };
-        var widgetTopLeftRotated = { x: Number(thisElt[0].getAttribute('widgettopleftx')), y: Number(thisElt[0].getAttribute('widgettoplefty')) };
-
-        return {
-            widgetBottomRight: $ax.public.fn.matrixMultiply(relativeToWorld, widgetBottomRightRotated),
-            widgetTopRight: $ax.public.fn.matrixMultiply(relativeToWorld, widgetTopRightRotated),
-            widgetBottomLeft: $ax.public.fn.matrixMultiply(relativeToWorld, widgetBottomLeftRotated),
-            widgetTopLeft: $ax.public.fn.matrixMultiply(relativeToWorld, widgetTopLeftRotated)
-        };
+        return containerDimensions;
     }
+
 
     $ax.public.fn.rotationMatrix = function (angleInDegrees) {
         var angleInRadians = angleInDegrees * (Math.PI / 180);
@@ -362,6 +343,12 @@
 
         return { m11: cosTheta, m12: -sinTheta, m21: sinTheta, m22: cosTheta, tx: 0.0, ty: 0.0 };
     }
+
+    $ax.public.fn.GetFieldFromStyle = function (query, field) {
+        var raw = query[0].style[field];
+        if (!raw) raw = query.css(field);
+        return Number(raw.replace('px', ''));
+        }
 
 
     $ax.public.fn.setTransformHowever = function (transformString) {

@@ -495,19 +495,9 @@ $axure.internal(function($ax) {
             return rects;
         }
 
-        var boundingRect = $ax.public.fn.getWidgetBoundingRect(elementId);
-
-        var leftToUse = axObj.left();
-        var topToUse = axObj.top();
-
-        if ($ax.public.fn.isCompoundVectorHtml(jObj[0])) {
-            leftToUse = boundingRect.left;
-            topToUse = boundingRect.top;
-        }
-
         rects.lastRect = new $ax.drag.Rectangle(
-                leftToUse,
-                topToUse,
+                axObj.left(),
+                axObj.top(),
                 axObj.width(),
                 axObj.height());
 

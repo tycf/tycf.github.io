@@ -323,6 +323,7 @@
             widget.elementId = elementId;
             widget.name = widget.label = (elementQuery.data('label') ? elementQuery.data('label') : '');
             widget.text = $ax('#' + elementId).text();
+            widget.opacity = Number(elementQuery.css('opacity')) * 100;
             var scriptId = $ax.repeater.getScriptIdFromElementId(elementId);
             var repeaterId = $ax.getParentRepeaterFromScriptId(scriptId);
             if (repeaterId) widget.repeater = $ax.public.fn.IsRepeater(obj.type) ? widget : _getWidgetInfo(repeaterId);
@@ -354,13 +355,14 @@
                     widget.height = elementAxQuery.height();
                 }
 
-                if (obj.generateCompound) {
-                    // assume this means that this is a compound vector.
-                    widget.x = boundingRect.left;
-                    widget.y = boundingRect.top;
-                    widget.pagex += boundingRect.left;
-                    widget.pagey += boundingRect.top;
-                }
+                //if (obj.generateCompound) {
+                //    // assume this means that this is a compound vector.
+                //    widget.x = boundingRect.left;
+                //    widget.y = boundingRect.top;
+
+                //    //widget.pagex += boundingRect.left;
+                //    //widget.pagey += boundingRect.top;
+                //}
 
             }
 

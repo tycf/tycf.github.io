@@ -581,7 +581,7 @@ $axure.internal(function($ax) {
     };
 
     // TODO: It may be a good idea to split this into multiple functions, or at least pull out more similar functions into private methods
-    var _initializeObjectEvents = function(query) {
+    var _initializeObjectEvents = function(query, allowItem) {
         // Must init the supressing eventing before the handlers, so that it has the ability to supress those events.
         initSuppressingEvents(query);
         
@@ -669,17 +669,18 @@ $axure.internal(function($ax) {
             }
 
             var $axElement = undefined;
+            var preeval = itemId && !allowItem;
 
             //initialize disabled elements, do this first before selected, cause if a widget is disabled, we don't want to apply selected style anymore
             if (($ax.public.fn.IsVector(dObj.type) || $ax.public.fn.IsImageBox(dObj.type) || $ax.public.fn.IsDynamicPanel(dObj.type) || $ax.public.fn.IsLayer(dObj.type))
-                && dObj.disabled && !itemId) {
+                && dObj.disabled && !preeval) {
                 if (!$axElement) $axElement = $ax('#' + elementId);
                 $axElement.enabled(false);
             }
 
             // Initialize selected elements if not in repeater
             if(($ax.public.fn.IsVector(dObj.type) || $ax.public.fn.IsImageBox(dObj.type) || $ax.public.fn.IsDynamicPanel(dObj.type) || $ax.public.fn.IsLayer(dObj.type))
-                && dObj.selected && !itemId) {
+                && dObj.selected && !preeval) {
                 if(!$axElement) $axElement = $ax('#' + elementId);
                 $axElement.selected(true);
             }

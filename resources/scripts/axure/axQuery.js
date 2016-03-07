@@ -281,9 +281,9 @@
             var isMenu = obj.type == $ax.constants.MENU_OBJECT_TYPE;
             var isTreeNode = obj.type == $ax.constants.TREE_NODE_OBJECT_TYPE;
             var isTable = obj.type == $ax.constants.TABLE_TYPE;
-            var isCompoundVector = obj.type == $ax.constants.VECTOR_SHAPE_TYPE && obj.generateCompound;
+            //var isCompoundVector = obj.type == $ax.constants.VECTOR_SHAPE_TYPE && obj.generateCompound;
 
-            if (isRepeater || isDynamicPanel || isLayer || isMaster || isMenu || isTreeNode || isTable || isCompoundVector) {
+            if (isRepeater || isDynamicPanel || isLayer || isMaster || isMenu || isTreeNode || isTable) {// || isCompoundVector) {
                 // Find parent that children should be pulled from. Default is just the elementId query (used by table and master)
                 var parent = $jobj(elementId);
                 if(isRepeater) {

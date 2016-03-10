@@ -1,0 +1,442 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <title>虚拟键盘</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <link href="data/apple-touch-icon.png" rel="apple-touch-icon"/>
+    <link href="resources/css/axure_rp_page.css" type="text/css" rel="stylesheet"/>
+    <link href="data/styles.css" type="text/css" rel="stylesheet"/>
+    <link href="files/虚拟键盘/styles.css" type="text/css" rel="stylesheet"/>
+    <script src="resources/scripts/jquery-1.7.1.min.js"></script>
+    <script src="resources/scripts/jquery-ui-1.8.10.custom.min.js"></script>
+    <script src="resources/scripts/axure/axQuery.js"></script>
+    <script src="resources/scripts/axure/globals.js"></script>
+    <script src="resources/scripts/axutils.js"></script>
+    <script src="resources/scripts/axure/annotation.js"></script>
+    <script src="resources/scripts/axure/axQuery.std.js"></script>
+    <script src="resources/scripts/axure/doc.js"></script>
+    <script src="data/document.js"></script>
+    <script src="resources/scripts/messagecenter.js"></script>
+    <script src="resources/scripts/axure/events.js"></script>
+    <script src="resources/scripts/axure/recording.js"></script>
+    <script src="resources/scripts/axure/action.js"></script>
+    <script src="resources/scripts/axure/expr.js"></script>
+    <script src="resources/scripts/axure/geometry.js"></script>
+    <script src="resources/scripts/axure/flyout.js"></script>
+    <script src="resources/scripts/axure/ie.js"></script>
+    <script src="resources/scripts/axure/model.js"></script>
+    <script src="resources/scripts/axure/repeater.js"></script>
+    <script src="resources/scripts/axure/sto.js"></script>
+    <script src="resources/scripts/axure/utils.temp.js"></script>
+    <script src="resources/scripts/axure/variables.js"></script>
+    <script src="resources/scripts/axure/drag.js"></script>
+    <script src="resources/scripts/axure/move.js"></script>
+    <script src="resources/scripts/axure/visibility.js"></script>
+    <script src="resources/scripts/axure/style.js"></script>
+    <script src="resources/scripts/axure/adaptive.js"></script>
+    <script src="resources/scripts/axure/tree.js"></script>
+    <script src="resources/scripts/axure/init.temp.js"></script>
+    <script src="files/虚拟键盘/data.js"></script>
+    <script src="resources/scripts/axure/legacy.js"></script>
+    <script src="resources/scripts/axure/viewer.js"></script>
+    <script src="resources/scripts/axure/math.js"></script>
+    <script type="text/javascript">
+      $axure.utils.getTransparentGifPath = function() { return 'resources/images/transparent.gif'; };
+      $axure.utils.getOtherPath = function() { return 'resources/Other.html'; };
+      $axure.utils.getReloadPath = function() { return 'resources/reload.html'; };
+    </script>
+  </head>
+  <body>
+    <div id="base" class="">
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6567" class="ax_default paragraph1">
+        <div id="u6567_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6568" class="text" style="visibility: visible;">
+          <p style="font-size:28px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">[未确认]</span></p><p style="font-size:28px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">虚拟键盘 v0229 Keyboards</span><span style="font-family:'ArialMT', 'Arial';font-size:18px;color:#CCCCCC;"></span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;"><br></span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">虚拟键盘随文本框获取焦点时升起，且支持不同的布局。</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">虚拟键盘由手机的操作系统提供，在这个环境下，我们能做的不多，但有一些细节值得努力。</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;"><br></span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">注：由于安卓手机的虚拟键盘品牌众多，无法全部覆盖，故此处用 iOS 的虚拟键盘为例进行说明。</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;"><br></span></p><p style="font-size:20px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">1）字母键盘</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">我们可以根据需求控制字母键盘右下角的按钮功能，共 3 类：</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">换行——切换到下一个文本框；</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">前往——直接提交表单；</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">搜索——提交搜索框。</span></p><p style="font-size:18px;"><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">DEMO及具体方法请移步 </span><a id="u6569" class="link"><span style="font-family:'ArialMT', 'Arial';text-decoration:underline;color:#FFFFFF;">这里</span></a><span style="font-family:'ArialMT', 'Arial';color:#CCCCCC;">&nbsp;</span><span style="font-family:'PingFangSC-Regular', 'PingFang SC';color:#CCCCCC;">（使用移动设备查看效果）</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6570" class="ax_default box_11">
+        <div id="u6570_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6571" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6572" class="ax_default image1">
+        <img id="u6572_img" class="img " src="images/按钮/u568.png"/>
+        <!-- Unnamed () -->
+        <div id="u6573" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (导航栏-返回) -->
+
+      <!-- Unnamed (Group) -->
+      <div id="u6575" class="ax_default">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6576" class="ax_default box_11">
+          <div id="u6576_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6577" class="text" style="visibility: visible;">
+            <p><span>页面标题</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Group) -->
+        <div id="u6578" class="ax_default">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6579" class="ax_default label">
+            <div id="u6579_div" class=""></div>
+            <!-- Unnamed () -->
+            <div id="u6580" class="text" style="visibility: visible;">
+              <p><span>返回</span></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Image) -->
+          <div id="u6581" class="ax_default image">
+            <img id="u6581_img" class="img " src="images/第三方服务_ui_配置要求/u536.png"/>
+            <!-- Unnamed () -->
+            <div id="u6582" class="text" style="display: none; visibility: hidden">
+              <p><span></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6583" class="ax_default">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6584" class="ax_default box_1">
+          <div id="u6584_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6585" class="text" style="display: none; visibility: hidden">
+            <p><span></span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6586" class="ax_default box_1">
+          <div id="u6586_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6587" class="text" style="display: none; visibility: hidden">
+            <p><span></span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6588" class="ax_default box_1">
+          <div id="u6588_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6589" class="text" style="visibility: visible;">
+            <p><span>邮箱</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6590" class="ax_default box_11">
+        <div id="u6590_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6591" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6592" class="ax_default image1">
+        <img id="u6592_img" class="img " src="images/按钮/u568.png"/>
+        <!-- Unnamed () -->
+        <div id="u6593" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (导航栏-返回) -->
+
+      <!-- Unnamed (Group) -->
+      <div id="u6595" class="ax_default">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6596" class="ax_default box_11">
+          <div id="u6596_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6597" class="text" style="visibility: visible;">
+            <p><span>页面标题</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Group) -->
+        <div id="u6598" class="ax_default">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6599" class="ax_default label">
+            <div id="u6599_div" class=""></div>
+            <!-- Unnamed () -->
+            <div id="u6600" class="text" style="visibility: visible;">
+              <p><span>返回</span></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Image) -->
+          <div id="u6601" class="ax_default image">
+            <img id="u6601_img" class="img " src="images/第三方服务_ui_配置要求/u536.png"/>
+            <!-- Unnamed () -->
+            <div id="u6602" class="text" style="display: none; visibility: hidden">
+              <p><span></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6603" class="ax_default">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6604" class="ax_default box_1">
+          <div id="u6604_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6605" class="text" style="visibility: visible;">
+            <p><span>······</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6606" class="ax_default box_1">
+          <div id="u6606_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6607" class="text" style="display: none; visibility: hidden">
+            <p><span></span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Image) -->
+        <div id="u6608" class="ax_default image">
+          <img id="u6608_img" class="img " src="images/文本框/u1127.png"/>
+          <!-- Unnamed () -->
+          <div id="u6609" class="text" style="display: none; visibility: hidden">
+            <p><span></span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Ellipse) -->
+        <div id="u6610" class="ax_default flow_shape">
+          <img id="u6610_img" class="img " src="images/文本框/u962.png"/>
+          <!-- Unnamed () -->
+          <div id="u6611" class="text" style="visibility: visible;">
+            <p><span>✕</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6612" class="ax_default box_1">
+          <div id="u6612_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6613" class="text" style="visibility: visible;">
+            <p><span>密码</span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6614" class="ax_default label">
+        <div id="u6614_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6615" class="text" style="visibility: visible;">
+          <p><span>密码键盘（webview），不含选词栏。</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6616" class="ax_default image">
+        <img id="u6616_img" class="img " src="images/虚拟键盘/u6616.png"/>
+        <!-- Unnamed () -->
+        <div id="u6617" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6618" class="ax_default box_11">
+        <div id="u6618_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6619" class="text" style="visibility: visible;">
+          <p><span>前往</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6620" class="ax_default box_11">
+        <div id="u6620_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6621" class="text" style="visibility: visible;">
+          <p><span>空格</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6622" class="ax_default image">
+        <img id="u6622_img" class="img " src="images/虚拟键盘/u6622.png"/>
+        <!-- Unnamed () -->
+        <div id="u6623" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6624" class="ax_default label">
+        <div id="u6624_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6625" class="text" style="visibility: visible;">
+          <p><span style="color:#CCCCCC;">字母键盘</span></p><p><span style="color:#CCCCCC;">包含选词栏，以及顶部的表单工具栏（ &lt; &gt; 完成）。</span></p><p><span style="color:#CCCCCC;">此工具栏是 webview 虚拟键盘默认的样式，如需隐藏，需特别处理。方法移步 </span><a id="u6626" class="link"><span style="text-decoration:underline;color:#FFFFFF;">这里</span></a><span style="color:#CCCCCC;">。</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6627" class="ax_default paragraph1">
+        <div id="u6627_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6628" class="text" style="visibility: visible;">
+          <p style="font-size:20px;"><span>2）密码键盘</span></p><p style="font-size:18px;"><span>常见的密码键盘为全字母键盘，且不包含选词栏。</span></p><p style="font-size:18px;"><span>考虑到一般情况下，密码为表单的最后一项，故建议将密码键盘的右下角按钮改为「前往」，即直接提交表单。</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6629" class="ax_default paragraph1">
+        <div id="u6629_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6630" class="text" style="visibility: visible;">
+          <p style="font-size:20px;"><span>3）九宫格数字键盘</span></p><p style="font-size:18px;"><span>常用于金额、交易密码以及数字验证码输入。</span></p><p style="font-size:18px;"><span>应根据需求调整。</span></p><p style="font-size:18px;"><span>考虑到这些文本框通常单独出现，故建议隐藏表单工具栏。</span></p><p style="font-size:18px;"><span>注意，金额输入需按需求决定是否包含小数点。</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6631" class="ax_default label">
+        <div id="u6631_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6632" class="text" style="visibility: visible;">
+          <p><span>数字键盘，隐藏了表单工具栏。</span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Rectangle) -->
+      <div id="u6633" class="ax_default box_11">
+        <div id="u6633_div" class=""></div>
+        <!-- Unnamed () -->
+        <div id="u6634" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (Image) -->
+      <div id="u6635" class="ax_default image1">
+        <img id="u6635_img" class="img " src="images/按钮/u568.png"/>
+        <!-- Unnamed () -->
+        <div id="u6636" class="text" style="display: none; visibility: hidden">
+          <p><span></span></p>
+        </div>
+      </div>
+
+      <!-- Unnamed (导航栏-返回) -->
+
+      <!-- Unnamed (Group) -->
+      <div id="u6638" class="ax_default">
+
+        <!-- Unnamed (Rectangle) -->
+        <div id="u6639" class="ax_default box_11">
+          <div id="u6639_div" class=""></div>
+          <!-- Unnamed () -->
+          <div id="u6640" class="text" style="visibility: visible;">
+            <p><span>页面标题</span></p>
+          </div>
+        </div>
+
+        <!-- Unnamed (Group) -->
+        <div id="u6641" class="ax_default">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6642" class="ax_default label">
+            <div id="u6642_div" class=""></div>
+            <!-- Unnamed () -->
+            <div id="u6643" class="text" style="visibility: visible;">
+              <p><span>返回</span></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Image) -->
+          <div id="u6644" class="ax_default image">
+            <img id="u6644_img" class="img " src="images/第三方服务_ui_配置要求/u536.png"/>
+            <!-- Unnamed () -->
+            <div id="u6645" class="text" style="display: none; visibility: hidden">
+              <p><span></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6646" class="ax_default">
+
+        <!-- Unnamed (Group) -->
+        <div id="u6647" class="ax_default">
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6648" class="ax_default box_1">
+            <div id="u6648_div" class=""></div>
+            <!-- Unnamed () -->
+            <div id="u6649" class="text" style="visibility: visible;">
+              <p><span>24600</span></p>
+            </div>
+          </div>
+
+          <!-- Unnamed (Rectangle) -->
+          <div id="u6650" class="ax_default box_1">
+            <div id="u6650_div" class=""></div>
+            <!-- Unnamed () -->
+            <div id="u6651" class="text" style="visibility: visible;">
+              <p><span>买入金额</span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Unnamed (Image) -->
+        <div id="u6652" class="ax_default image">
+          <img id="u6652_img" class="img " src="images/文本框/u1172.png"/>
+          <!-- Unnamed () -->
+          <div id="u6653" class="text" style="display: none; visibility: hidden">
+            <p><span></span></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Unnamed (Group) -->
+      <div id="u6654" class="ax_default">
+
+        <!-- Unnamed (Group) -->
+        <div id="u6655" class="ax_default">
+
+          <!-- Unnamed (Image) -->
+          <div id="u6656" class="ax_default image1">
+            <img id="u6656_img" class="img " src="images/文本框/u1068.png"/>
+            <!-- Unnamed () -->
+            <div id="u6657" class="text" style="display: none; visibility: hidden">
+              <p><span></span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

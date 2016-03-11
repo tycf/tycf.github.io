@@ -947,7 +947,11 @@
             // Rdos already handled, contained widgets are limboed by the parent, and sub menus should be ignored
             if($ax.public.fn.IsReferenceDiagramObject(diagramObject.type) || $ax.public.fn.IsTableCell(diagramObject.type) || diagramObject.isContained || $jobj(elementId).hasClass('sub_menu')) return;
             if(diagramObject.type == 'table' && $jobj(elementId).parent().hasClass('ax_menu')) return;
-            if(skipRepeater && $ax.getParentRepeaterFromElementId(elementId)) return;
+            if(skipRepeater) {
+                // Any item in a repeater should return
+                var repeater = $ax.getParentRepeaterFromElementId(elementId);
+                if (repeater && repeater != elementId) return;
+            }
 
             var scriptId = $ax.repeater.getScriptIdFromElementId(elementId);
             var shouldBeVisible = Boolean(!newLimboIds[scriptId] && !newHiddenIds[scriptId]);

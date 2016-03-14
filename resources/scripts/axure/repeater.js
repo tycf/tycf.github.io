@@ -1546,22 +1546,19 @@ $axure.internal(function($ax) {
         }
     };
 
-    var _getShownStateId = function (id) {
+    var _getShownStateObj = function (id) {
         var obj = $obj(id);
-        if (!obj || !$ax.public.fn.IsDynamicPanel(obj.type)) return id;
+        if (!obj || !$ax.public.fn.IsDynamicPanel(obj.type)) return $ax('#' + id);
 
         var children = $ax.visibility.applyWidgetContainer(id, true).children();
         for (var i = 0; i < children.length; i++) {
             var child = children[i];
             while ($ax.visibility.isContainer(child.id)) child = $(child).children()[0];
-            if (child && child.style && child.style.display != 'none') return child.id;
+            if (child && child.style && child.style.display != 'none') return $ax('#' + child.id);
         }
-        return id;
+
+        return $ax('#' + id);
     };
-
-    var _getShownStateObj = function(id) { return $ax('#' + _getShownStateId(id));}
-
-    _dynamicPanelManager.getShownState = function (id) { return $jobj(_getShownStateId(id)); };
 
     var _getClamp = function(id) {
         var obj = $obj(id);

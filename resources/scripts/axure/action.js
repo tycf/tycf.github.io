@@ -1271,7 +1271,10 @@
                     }
 
                     var css = null;
-                    if(deltaHeight != 0 || deltaWidth != 0) {
+                    var rootLayer = null;
+                    if (deltaHeight != 0 || deltaWidth != 0) {
+                        rootLayer = $ax.move.getRootLayer(elementId);
+                        if(rootLayer) $ax.visibility.pushContainer(rootLayer, false);
                         css = _getCssForResizingWidget(elementId, eventInfo, resizeInfo.anchor, newWidth, newHeight, oldWidth, oldHeight, delta, options.stop, !rotateHandlesMove);
                         idToResizeMoveState[elementId].resizeResult = undefined;
                     }
@@ -1293,7 +1296,11 @@
                     if(moveInfo) $ax.event.raiseSyntheticEvent(elementId, 'onMove');
 
                     //$ax.event.raiseSyntheticEvent(elementId, 'onResize');
-                    if(css) $ax('#' + elementId).resize(css, resizeInfo, true, moves);
+                    if (css) {
+                        $ax('#' + elementId).resize(css, resizeInfo, true, moves, function () {
+                            if(rootLayer) $ax.visibility.popContainer(rootLayer, false);
+                        });
+                    }
                     else {
                         _fireAnimationFromQueue(elementId, queueTypes.resize);
                         if (moves) _fireAnimationFromQueue(elementId, queueTypes.move);

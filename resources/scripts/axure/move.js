@@ -9,15 +9,7 @@
         var widget = $jobj(id);
         var query = $ax('#' + id);
         var isLayer = $ax.getTypeFromElementId(id) == $ax.constants.LAYER_TYPE;
-        var rootLayer = isLayer ? id : '';
-
-        var parentIds = $ax('#' + id).getParents(true, '*')[0];
-        for(var i = 0; i < parentIds.length; i++) {
-            var parentId = parentIds[i];
-            // Keep climbing up layers until you hit a non-layer. At that point you have your root layer
-            if($ax.public.fn.IsLayer($ax.getTypeFromElementId(parentId))) rootLayer = parentId;
-            else break;
-        }
+        var rootLayer = _move.getRootLayer(id);
 
         if(rootLayer) {
             $ax.visibility.pushContainer(rootLayer, false);
@@ -64,6 +56,21 @@
     };
     $ax.move.GetWidgetMoveInfo = function() {
         return $.extend({}, widgetMoveInfo);
+    };
+
+    _move.getRootLayer = function (id) {
+        var isLayer = $ax.getTypeFromElementId(id) == $ax.constants.LAYER_TYPE;
+        var rootLayer = isLayer ? id : '';
+
+        var parentIds = $ax('#' + id).getParents(true, '*')[0];
+        for(var i = 0; i < parentIds.length; i++) {
+            var parentId = parentIds[i];
+            // Keep climbing up layers until you hit a non-layer. At that point you have your root layer
+            if($ax.public.fn.IsLayer($ax.getTypeFromElementId(parentId))) rootLayer = parentId;
+            else break;
+        }
+
+        return rootLayer;
     };
 
     $ax.move.MoveWidget = function (id, x, y, options, to, animationCompleteCallback, shouldFire, jobj, moveInfo) {

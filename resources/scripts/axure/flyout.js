@@ -245,8 +245,11 @@ $axure.internal(function($ax) {
     var _selectRange = function(elementId, start, end) {
         $jobj(elementId).each(function() {
             if(this.setSelectionRange) {
-                this.focus();
-                this.setSelectionRange(start, end);
+                var validTypes = ["text", "search", "url", "tel", "password"];
+                if(this.tagName.toLowerCase() != "input" || validTypes.indexOf(this.type) > -1) {
+                    this.focus();
+                    this.setSelectionRange(start, end);
+                }
             } else if(this.createTextRange) {
                 var range = this.createTextRange();
                 range.collapse(true);

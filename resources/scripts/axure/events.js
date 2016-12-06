@@ -717,9 +717,8 @@ $axure.internal(function($ax) {
                         $ax.placeholderManager.updatePlaceholder(inputId, true);
                         $ax.placeholderManager.moveCaret(id, 0);
                     }
-                }).bind('focus', function() {
-                    $ax.placeholderManager.moveCaret(this.id);
-                    if (dObj.HideHintOnFocused) {
+                }).bind('focus', function () {
+                    if(dObj.HideHintOnFocused) {
                         var id = this.id;
                         var inputIndex = id.indexOf('_input');
                         if (inputIndex == -1) return;
@@ -728,7 +727,6 @@ $axure.internal(function($ax) {
                         if (!$ax.placeholderManager.isActive(inputId)) return;
                         $ax.placeholderManager.updatePlaceholder(inputId, false, true);
                     }
-                }).bind('mousedown', function() {
                     $ax.placeholderManager.moveCaret(this.id);
                 }).bind('mouseup', function() {
                     $ax.placeholderManager.moveCaret(this.id);

@@ -32,7 +32,8 @@ $axure.internal(function($ax) {
 
             _setRepeaterDataSet(repeaterId, repeaterId);
             var initialItemIds = obj.repeaterPropMap.itemIds;
-            for(var i = 0; i < initialItemIds.length; i++) $ax.addItemIdToRepeater(initialItemIds[i], repeaterId);
+            for (var i = 0; i < initialItemIds.length; i++) $ax.addItemIdToRepeater(initialItemIds[i], repeaterId);
+            $ax.visibility.initRepeater(repeaterId);
         });
     };
     _repeaterManager.load = _loadRepeaters;
@@ -170,6 +171,8 @@ $axure.internal(function($ax) {
 
             var div = $('<div></div>');
             div.html(html);
+            div.find('.' + $ax.visibility.HIDDEN_CLASS).removeClass($ax.visibility.HIDDEN_CLASS);
+            div.find('.' + $ax.visibility.UNPLACED_CLASS).removeClass($ax.visibility.UNPLACED_CLASS);
 
             var paddingTop = _getAdaptiveProp(propMap, 'paddingTop', viewId);
             var paddingLeft = _getAdaptiveProp(propMap, 'paddingLeft', viewId);
@@ -264,13 +267,9 @@ $axure.internal(function($ax) {
             for(var i = 0; i < ids.length; i++) $ax.initializeObjectEvents($ax('#' + ids[i]), true);
         }
 
-        var query = $ax(function(diagramObject, elementId) {
-            // All objects with the repeater as their parent, except the repeater itself.
-            var scriptId = _getScriptIdFromElementId(elementId);
-            return $ax.getParentRepeaterFromScriptId(scriptId) == repeaterId && scriptId != repeaterId;
-        });
+        var query = _getItemQuery(repeaterId);
         if(viewId) $ax.adaptive.applyView(viewId, query);
-        else $ax.visibility.resetLimboAndHiddenToDefaults(query);
+        else $ax.visibility.resetLimboAndHiddenToDefaults(_getItemQuery(repeaterId, preevalMap));
 //        else {
 //            var limbo = {};
 //            var hidden = {};
@@ -328,6 +327,22 @@ $axure.internal(function($ax) {
         $ax.action.refreshEnd();
     };
     _repeaterManager.refreshRepeater = _refreshRepeater;
+
+    var _getItemQuery = function(repeaterId, preevalMap) {
+        var query = $ax(function (diagramObject, elementId) {
+            // Also need to check that this in not preeval
+            if(preevalMap) {
+                var itemId = _getItemIdFromElementId(elementId);
+                if(preevalMap[itemId]) return false;
+            }
+
+            // All objects with the repeater as their parent, except the repeater itself.
+            var scriptId = _getScriptIdFromElementId(elementId);
+            return $ax.getParentRepeaterFromScriptId(scriptId) == repeaterId && scriptId != repeaterId;
+        });
+
+        return query;
+    }
 
     _repeaterManager.refreshAllRepeaters = function() {
         $ax('*').each(function(diagramObject, elementId) {
@@ -1668,7 +1683,8 @@ $axure.internal(function($ax) {
             }
 
             // Ignore fixed
-            if(!childId || $ax.visibility.limboIds[childId] || !$ax.visibility.IsIdVisible(childId)) continue;
+            if(!childId || $ax.visibility.limboIds[childId] || !$ax.visibility.IsIdVisible(childId)
+                || $ax.public.fn.IsDynamicPanel(childObj.type) && childObj.fixedHorizontal) continue;
 
             var boundingRect = $ax.public.fn.getWidgetBoundingRect(childId);
             var position = { left: boundingRect.left, top: boundingRect.top };

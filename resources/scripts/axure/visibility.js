@@ -36,8 +36,8 @@
         //and doesn't go hidden on the second out if we do not set display here.
         if(visible) {
             //hmmm i will need to remove the class here cause display will not be overwriten by set to ''
-            if($(element).hasClass('ax_default_hidden')) $(element).removeClass('ax_default_hidden');
-            if($(element).hasClass('ax_default_unplaced')) $(element).removeClass('ax_default_unplaced');
+            if($(element).hasClass(HIDDEN_CLASS)) $(element).removeClass(HIDDEN_CLASS);
+            if($(element).hasClass(UNPLACED_CLASS)) $(element).removeClass(UNPLACED_CLASS);
             element.style.display = '';
             element.style.visibility = 'visible';
         } else {
@@ -287,7 +287,8 @@
                 if(preserveScroll) {
                     visibleWrapped.css('opacity', 0);
                     visibleWrapped.css('visibility', 'visible');
-                    visibleWrapped.css('display', '');
+                    visibleWrapped.css('display', 'block');
+                    //was hoping we could just use fadein here, but need to set display before set scroll position
                     _tryResumeScrollForDP(childId);
                     visibleWrapped.animate({ opacity: 1 }, {
                         duration: options.duration,
@@ -438,6 +439,8 @@
                 });
             }
         } else {
+            // Because the move is gonna fire on annotation and ref too, need to update complete total
+            completeTotal = $addAll(visibleWrapped, childId).length;
             if(options.value) {
                 _slideStateIn(childId, childId, options, size, false, onComplete, visibleWrapped, preserveScroll);
             } else {
@@ -647,15 +650,16 @@
                 var childIds = $ax('#' + id).getChildren()[0].children;
                 for(var i = 0; i < childIds.length; i++) {
                     var childId = childIds[i];
+                    if($ax.dynamicPanelManager.getFixedInfo(childId).fixed) continue;
                     var cssChange = {
                         left: '-=' + css.left,
                         top: '-=' + css.top
                     };
+                    var childObj = $jobj(childId);
                     if($ax.getTypeFromElementId(childId) == $ax.constants.LAYER_TYPE) {
                         _pushContainer(childId, false);
                         $ax.visibility.applyWidgetContainer(childId, true).css(cssChange);
                     } else {
-                        var jobj = $jobj(childId);
                         //if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
                         //    var grandChildren = jobj[0].children;
                         //    //while (grandChildren.length > 0 && grandChildren[0].id.indexOf('container') >= 0) grandChildren = grandChildren[0].children;
@@ -665,10 +669,11 @@
                         //        if (grandChildId.indexOf(childId + 'p') >= 0 || grandChildId.indexOf('_container') >= 0) $jobj(grandChildId).css(cssChange);
                         //    }
                         //} else 
-                            jobj.css(cssChange);
+                        childObj.css(cssChange);
+                        childObj = $addAll(childObj, childId);
                     }
 
-                    container.append($jobj(childId));
+                    container.append(childObj);
                 }
             }
         }
@@ -701,6 +706,7 @@
             var childIds = $ax('#' + id).getChildren()[0].children;
             for (var i = 0; i < childIds.length; i++) {
                 var childId = childIds[i];
+                if($ax.dynamicPanelManager.getFixedInfo(childId).fixed) continue;
                 var cssChange = {
                     left: '+=' + left,
                     top: '+=' + top
@@ -709,7 +715,7 @@
                     $ax.visibility.applyWidgetContainer(childId, true).css(cssChange);
                     _popContainer(childId, false);
                 } else {
-                    var jobj = $jobj(childId);
+                    var childObj = $jobj(childId);
                 //    if ($ax.public.fn.isCompoundVectorHtml(jobj[0])) {
                 //        var grandChildren = jobj[0].children;
                 //        //while (grandChildren.length > 0 && grandChildren[0].id.indexOf('container') >= 0) grandChildren = grandChildren[0].children;
@@ -718,7 +724,7 @@
                 //            if (grandChildId.indexOf(childId + 'p') >= 0 || grandChildId.indexOf('_container') >= 0) $jobj(grandChildId).css(cssChange);
                 //        }
                 //} else
-                        jobj.css(cssChange);
+                    childObj.css(cssChange);
                 }
             }
         }
@@ -980,7 +986,7 @@
     $ax.visibility.resetLimboAndHiddenToDefaults = function (query) {
         if(!query) query = $ax('*');
         _clearLimboAndHidden();
-        _addLimboAndHiddenIds(_defaultLimbo, _defaultHidden, query, true);
+        _addLimboAndHiddenIds(_defaultLimbo, _defaultHidden, query);
     };
 
     $ax.visibility.isScriptIdLimbo = function(scriptId) {
@@ -995,15 +1001,31 @@
 
     $ax.visibility.initialize = function() {
         // initialize initial visible states
-        $(".ax_default_hidden").each(function (index, diagramObject) {
+        $('.' + HIDDEN_CLASS).each(function (index, diagramObject) {
             _defaultHidden[$ax.repeater.getScriptIdFromElementId(diagramObject.id)] = true;
         });
 
-        $(".ax_default_unplaced").each(function (index, diagramObject) {
+        $('.' + UNPLACED_CLASS).each(function (index, diagramObject) {
             _defaultLimbo[$ax.repeater.getScriptIdFromElementId(diagramObject.id)] = true;
         });
 
         _addLimboAndHiddenIds(_defaultLimbo, _defaultHidden, $ax('*'), true);
     };
+
+    _visibility.initRepeater = function(repeaterId) {
+        var html = $('<div></div>');
+        html.append($jobj(repeaterId + '_script').html());
+
+        html.find('.' + HIDDEN_CLASS).each(function (index, element) {
+            _defaultHidden[$ax.repeater.getScriptIdFromElementId(element.id)] = true;
+        });
+
+        html.find('.' + UNPLACED_CLASS).each(function (index, element) {
+            _defaultLimbo[$ax.repeater.getScriptIdFromElementId(element.id)] = true;
+        });
+    }
+
+    var HIDDEN_CLASS = _visibility.HIDDEN_CLASS = 'ax_default_hidden';
+    var UNPLACED_CLASS = _visibility.UNPLACED_CLASS = 'ax_default_unplaced';
 
 });

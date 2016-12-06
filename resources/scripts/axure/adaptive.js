@@ -11,6 +11,7 @@
     var _enabledViews = [];
 
     var _initialViewToLoad;
+    var _initialViewSizeToLoad;
 
     var _loadFinished = false;
     $ax.adaptive.loadFinished = function() {
@@ -117,8 +118,7 @@
                     _setLineImage(elementId + "_line", lineImg);
                 } else if(diagramObject.type == $ax.constants.CONNECTOR_TYPE) {
                     _setAdaptiveConnectorImages(elementId, images, '');
-                } else {
-                    if (!images) return;
+                } else if(images) {
                     if (diagramObject.generateCompound) {
 
                         if($ax.style.IsWidgetDisabled(elementId)) {
@@ -293,7 +293,10 @@
         for(var i = 0; i < viewIdChain.length; i++) {
             var viewId = viewIdChain[i];
             var viewStyle = diagramObject.adaptiveStyles[viewId];
-            if(viewStyle) adaptiveChain[adaptiveChain.length] = viewStyle;
+            if(viewStyle) {
+                adaptiveChain[adaptiveChain.length] = viewStyle;
+                if (viewStyle.size) $ax.public.fn.convertToSingleImage($jobj(elementId));
+            }
         }
 
         var state = $ax.style.generateState(elementId);
@@ -445,7 +448,9 @@
             } else _handleLoadViewId(view);
         } else if(message == 'setAdaptiveViewForSize') {
             _autoIsHandledBySidebar = true;
-            _handleSetViewForSize(data.width, data.height);
+            if(!_isAdaptiveInitialized()) {
+                _initialViewSizeToLoad = data;
+            } else _handleSetViewForSize(data.width, data.height);
         }
     });
 
@@ -472,7 +477,8 @@
                 _enabledViews[_enabledViews.length] = _idToView[enabledViewIds[i]];
             }
 
-            _handleLoadViewId(_initialViewToLoad);
+            if(_autoIsHandledBySidebar && _initialViewSizeToLoad) _handleSetViewForSize(_initialViewSizeToLoad.width, _initialViewSizeToLoad.height);
+            else _handleLoadViewId(_initialViewToLoad);
         }
 
         $axure.resize(function(e) {

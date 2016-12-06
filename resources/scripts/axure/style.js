@@ -202,9 +202,9 @@
                 });
             }
         }
-
         var obj = $obj(id);
         if(obj) {
+            var actionId = id;
             if ($ax.public.fn.IsDynamicPanel(obj.type) || $ax.public.fn.IsLayer(obj.type)) {
                 var children = $axure('#' + id).getChildren()[0].children;
                 for(var i = 0; i < children.length; i++) {
@@ -219,23 +219,29 @@
                     } else $axure('#' + childId).selected(value);
                 }
             } else {
-                while(obj.isContained && !_widgetHasState(id, 'selected')) obj = obj.parent;
+                var widgetHasSelectedState = _widgetHasState(id, SELECTED);
+                while(obj.isContained && !widgetHasSelectedState) obj = obj.parent;
                 var itemId = $ax.repeater.getItemIdFromElementId(id);
                 var path = $ax.getPathFromScriptId($ax.repeater.getScriptIdFromElementId(id));
                 path[path.length - 1] = obj.id;
-                id = $ax.getElementIdFromPath(path, { itemNum: itemId });
-                if(alwaysApply || _widgetHasState(id, SELECTED)) {
-                    var state = _generateSelectedState(id, value);
-                    _applyImageAndTextJson(id, state);
-                    _updateElementIdImageStyle(id, state);
+                actionId = $ax.getElementIdFromPath(path, { itemNum: itemId });
+                if(alwaysApply || widgetHasSelectedState) {
+                    var state = _generateSelectedState(actionId, value);
+                    _applyImageAndTextJson(actionId, state);
+                    _updateElementIdImageStyle(actionId, state);
                 }
+                //added actionId and this hacky logic because we set style state on child, but interaction on parent
+                //then the id saved in _selectedWidgets would be depended on widgetHasSelectedState... more see case 1818143
+                while(obj.isContained && !$ax.getObjectFromElementId(id).interactionMap) obj = obj.parent;
+                path = $ax.getPathFromScriptId($ax.repeater.getScriptIdFromElementId(id));
+                path[path.length - 1] = obj.id;
+                actionId = $ax.getElementIdFromPath(path, { itemNum: itemId });
             }
         }
 
         //    ApplyImageAndTextJson(id, value ? 'selected' : 'normal');
         _selectedWidgets[id] = value;
-
-        if(raiseSelectedEvents) $ax.event.raiseSelectedEvents(id, value);
+        if(raiseSelectedEvents) $ax.event.raiseSelectedEvents(actionId, value);
     };
 
     var _generateSelectedState = function(id, selected) {
@@ -264,16 +270,16 @@
         // Right now this is the only style on the widget. If other styles (ex. Rollover), are allowed
         //  on TextBox/TextArea, or Placeholder is applied to more widgets, this may need to do more.
         var obj = $jobj(inputId);
-        obj.attr('style', '');
-        if (!value) {
-            var height = document.getElementById(inputId).style['height'];
-            var width = document.getElementById(inputId).style['width'];
-            obj.attr('style', '');
-            //removing all styles, but now we can change the size, so we should add them back
-            //this is more like a quick hack
-            if(height) obj.css('height', height);
-            if(width) obj.css('width', width);
 
+        var height = document.getElementById(inputId).style['height'];
+        var width = document.getElementById(inputId).style['width'];
+        obj.attr('style', '');
+        //removing all styles, but now we can change the size, so we should add them back
+        //this is more like a quick hack
+        if (height) obj.css('height', height);
+        if (width) obj.css('width', width);
+
+        if(!value) {
             try { //ie8 and below error
                 if(password) document.getElementById(inputId).type = 'password';
             } catch(e) { } 

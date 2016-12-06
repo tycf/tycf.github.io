@@ -107,7 +107,7 @@
             if(!includeHidden && !$ax.visibility.IsIdVisible(childId)) continue;
             if ($ax.public.fn.IsLayer($obj(childId).type)) {
                 if (includeLayers) deep.push(childId);
-                var recursiveChildren = _getLayerChildrenDeep(childId, includeLayers);
+                var recursiveChildren = _getLayerChildrenDeep(childId, includeLayers, includeHidden);
                 for (var j = 0; j < recursiveChildren.length; j++) deep.push(recursiveChildren[j]);
             } else deep.push(childId);
         }
@@ -185,14 +185,9 @@
                 }
             }
         }
-        // Now account for flip
-        if(_isCompoundVectorHtml(element)) {
-            if (flip == 'x') position.top = mirrorHeight - position.top;
-            else if (flip == 'y') position.left = mirrorWidth - position.left;
-        } else {
-            if(flip == 'x') position.top = mirrorHeight - position.top - tempBoundingRect.height;
-            else if(flip == 'y') position.left = mirrorWidth - position.left - tempBoundingRect.width;
-        }
+         //Now account for flip
+        if (flip == 'x') position.top = mirrorHeight - position.top - element.getBoundingClientRect().height;
+        else if (flip == 'y') position.left = mirrorWidth - position.left - element.getBoundingClientRect().width;
 
         boundingRect = {
             left: position.left,
@@ -293,6 +288,7 @@
     $ax.public.fn.l2 = function (x, y) { return Math.sqrt(x * x + y * y); }
 
     $ax.public.fn.convertToSingleImage = function (jobj) {
+        if(!jobj[0]) return;
 
         var widgetId = jobj[0].id;
         var object = $obj(widgetId);

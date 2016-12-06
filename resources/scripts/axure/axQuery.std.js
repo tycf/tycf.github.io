@@ -217,11 +217,6 @@ $axure.internal(function($ax) {
                 // Remove lightbox, unregister flyout
                 lightbox.remove();
                 $ax.flyoutManager.unregisterPanel(elementId, true);
-
-                _setVisibility(elementId, true, options);
-                if(options && options.showType == 'front') $ax.legacy.BringToFront(elementId);
-
-                continue;
             }
             _setVisibility(elementId, true, options);
         }
@@ -229,53 +224,53 @@ $axure.internal(function($ax) {
         return this;
     };
 
-    var _getAnimateInfo = function(options, defaultDuration) {
+    var _getAnimateInfo = function (options, defaultDuration, useHide) {
         var animateInfo = {
-            easingType: 'none',
-            direction: '',
-            duration: options && options.duration || defaultDuration
+            duration: options && (useHide ? options.durationHide : options.duration) || defaultDuration
         };
 
-        if(options && options.easing) {
-            switch(options.easing) {
-            case 'fade':
-                animateInfo.easingType = 'fade';
-                animateInfo.direction = '';
-                break;
-            case 'slideLeft':
-                animateInfo.easingType = 'swing';
-                animateInfo.direction = 'left';
-                break;
-            case 'slideRight':
-                animateInfo.easingType = 'swing';
-                animateInfo.direction = 'right';
-                break;
-            case 'slideUp':
-                animateInfo.easingType = 'swing';
-                animateInfo.direction = 'up';
-                break;
-            case 'slideDown':
-                ;
-                animateInfo.easingType = 'swing';
-                animateInfo.direction = 'down';
-                break;
-            case 'flipLeft':
-                animateInfo.easingType = 'flip';
-                animateInfo.direction = 'left';
-                break;
-            case 'flipRight':
-                animateInfo.easingType = 'flip';
-                animateInfo.direction = 'right';
-                break;
-            case 'flipUp':
-                animateInfo.easingType = 'flip';
-                animateInfo.direction = 'up';
-                break;
-            case 'flipDown':
-                animateInfo.easingType = 'flip';
-                animateInfo.direction = 'down';
-                break;
-            }
+        var easing = options && (useHide ? options.easingHide : options.easing) || 'none';
+        switch (easing) {
+        case 'fade':
+            animateInfo.easingType = 'fade';
+            animateInfo.direction = '';
+            break;
+        case 'slideLeft':
+            animateInfo.easingType = 'swing';
+            animateInfo.direction = 'left';
+            break;
+        case 'slideRight':
+            animateInfo.easingType = 'swing';
+            animateInfo.direction = 'right';
+            break;
+        case 'slideUp':
+            animateInfo.easingType = 'swing';
+            animateInfo.direction = 'up';
+            break;
+        case 'slideDown':
+            ;
+            animateInfo.easingType = 'swing';
+            animateInfo.direction = 'down';
+            break;
+        case 'flipLeft':
+            animateInfo.easingType = 'flip';
+            animateInfo.direction = 'left';
+            break;
+        case 'flipRight':
+            animateInfo.easingType = 'flip';
+            animateInfo.direction = 'right';
+            break;
+        case 'flipUp':
+            animateInfo.easingType = 'flip';
+            animateInfo.direction = 'up';
+            break;
+        case 'flipDown':
+            animateInfo.easingType = 'flip';
+            animateInfo.direction = 'down';
+            break;
+        default:
+            animateInfo.easingType = 'none';
+            animateInfo.direction = '';
         }
 
         return animateInfo;
@@ -299,15 +294,14 @@ $axure.internal(function($ax) {
         for (var index = 0; index < elementIds.length; index++) {
             var elementId = elementIds[index];
             var show = !$ax.visibility.IsIdVisible(elementId);
-            _setVisibility(elementId, show, options);
+            _setVisibility(elementId, show, options, !show);
         }
 
         return this;
     };
 
-    var _setVisibility = function (elementId, value, options) {
-
-        var animateInfo = _getAnimateInfo(options, 0);
+    var _setVisibility = function (elementId, value, options, useHide) {
+        var animateInfo = _getAnimateInfo(options, 0, useHide);
 
         var wasShown = $ax.visibility.IsIdVisible(elementId);
         var compress = options && options.showType == 'compress' && wasShown != value;
@@ -328,6 +322,8 @@ $axure.internal(function($ax) {
         });
         if(compress && !compressed) $ax.dynamicPanelManager.compressToggle(elementId, options.vertical, value, options.compressEasing, options.compressDuration);
         compressed = true;
+
+        if(options && options.bringToFront) $ax.legacy.BringToFront(elementId);
     };
 
     $ax.public.fn.setOpacity = function(opacity, easing, duration) {
@@ -538,6 +534,10 @@ $axure.internal(function($ax) {
             }
 
             var children = query.children().not('div.text');
+            while(children && children.length && $(children[0]).attr('id').indexOf('container') != -1) {
+                children = children.children().not('div.text');
+            }
+
             if(children && children.length !== 0) {
                 var childAnimationArray = [];
                 var isConnector = $ax.public.fn.IsConnector($obj(elementId).type);

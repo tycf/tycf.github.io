@@ -83,7 +83,7 @@ div.annnoteimage {
     height: 12px;
     padding-top: 1px;
     text-align: center;
-    background-color: #0a6cd6;
+    background-color: #138CDD;
     -moz-box-shadow: 1px 1px 3px #aaa;
     -webkit-box-shadow: 1px 1px 3px #aaa;
     box-shadow: 1px 1px 3px #aaa;
@@ -110,7 +110,7 @@ div.annnotelabel {
     white-space: nowrap;
     color: white;
     
-    background-color: #0a6cd6;
+    background-color: #138CDD;
     -moz-box-shadow: 1px 1px 3px #aaa;
     -webkit-box-shadow: 1px 1px 3px #aaa;
     box-shadow: 1px 1px 3px #aaa;
@@ -196,7 +196,6 @@ div.annnotelabel {
     margin: -5px;*/
     -moz-box-shadow: 0 0 10px 3px #15d6ba;
     box-shadow: 0 0 10px 3px #15d6ba;
-
 }
 
 .pulsateBorder {
@@ -225,8 +224,8 @@ div.annnotelabel {
 }
 
 .widgetNoteSelected {
-    -moz-box-shadow: 0 0 10px 3px #0a6cd6;
-    box-shadow: 0 0 10px 3px #0a6cd6;
+    -moz-box-shadow: 0 0 10px 3px #138CDD;
+    box-shadow: 0 0 10px 3px #138CDD;
     /*-moz-box-shadow: 0 0 20px #3915d6;
     box-shadow: 0 0 20px #3915d6;*/
     /*border: 3px solid #3915d6;*/

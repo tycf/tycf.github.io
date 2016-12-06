@@ -61,6 +61,14 @@
         return $(document.getElementById(id));
     };
 
+    window.$jobjAll = function(id) {
+        return $addAll($jobj(id), id);
+    };
+
+    window.$addAll = function(jobj, id) {
+        return jobj.add($jobj(id + '_ann')).add($jobj(id + '_ref'));
+    };
+
     $ax.INPUT = function(id) { return id + "_input"; };
     $ax.IsImageFocusable = function (type) { return $ax.public.fn.IsImageBox(type) || $ax.public.fn.IsVector(type) || $ax.public.fn.IsTreeNodeObject(type) || $ax.public.fn.IsTableCell(type); };
     $ax.IsTreeNodeObject = function (type) { return $ax.public.fn.IsTreeNodeObject(type); };

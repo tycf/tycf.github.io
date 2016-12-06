@@ -21,8 +21,7 @@ function openPreviousPage() {
     var SHOW_HIDE_ANIMATION_DURATION = 0;
 
     var HIGHLIGHT_INTERACTIVE_VAR_NAME = 'hi';
-    var ADAPTIVE_VIEW_VAR_NAME = 'view';
-
+    
     var currentPageLoc = '';
     var currentPlayerLoc = '';
     var currentPageHashString = '';

@@ -63,7 +63,8 @@
         var SITEMAP_COLLAPSE_VAR_NAME = 'c';
         var PLUGIN_VAR_NAME = 'g';
         var FOOTNOTES_VAR_NAME = 'fn';
-        var lastLeftPanelWidth = 305;
+        var ADAPTIVE_VIEW_VAR_NAME = 'view';
+        var lastLeftPanelWidth = 295;
         var toolBarOnly = true;
 
         // isolate scope
@@ -153,6 +154,10 @@
                             viewport.setAttribute('content', 'width=device-width, initial-scale=1.0');
                             resizeContent();
                         }, false);
+
+                        $axure.page.bind('load.start', function() {
+                            resizeContent();
+                        });
                     }
                 }
 
@@ -214,13 +219,13 @@
                 $(document).trigger('ContainerHeightChange',[controlContainerHeight]);
 
                 if(MOBILE_DEVICE) {
-                    $axure.messageCenter.postMessage('setAdaptiveViewForSize', {'width':newWidth, 'height':$('#rightPanel').height()});
+                    if(!(getHashStringVar(ADAPTIVE_VIEW_VAR_NAME).length > 0)) $axure.messageCenter.postMessage('setAdaptiveViewForSize', {'width':newWidth, 'height':$('#rightPanel').height()});
                 }
             }
 
             var collapseToBar = $axure.player.collapseToBar = function() {
                 lastLeftPanelWidth = $('#leftPanel').width();
-                $('#leftPanel').width('65px');
+                $('#leftPanel').width('55px');
                 $('.vsplitbar').hide();
                 $('#rightPanel').width($(window).width() - $('#leftPanel').width());
                 $(window).resize();

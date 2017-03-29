@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
     <title>Untitled Document</title>
@@ -16,12 +16,11 @@
         }
     </script>
 
-    <script type="text/javascript" src="resources/scripts/jquery-1.7.1.min.js"></script>
-    <script type="text/javascript" src="resources/scripts/player/splitter.js"></script>
-    <script type="text/javascript" src="resources/scripts/axutils.js"></script>
-    <script type="text/javascript" src="resources/scripts/player/axplayer.js"></script>
-    <script type="text/javascript" src="resources/scripts/messagecenter.js"></script>
-    <script type="text/javascript" src="data/document.js"></script>
+    <!-- 8.0.0.3323 -->
+<script src="resources/scripts/jquery-1.7.1.min.js"></script>
+<script src="resources/scripts/startPre.js"></script>
+<script src="data/document.js"></script>
+
     <style type="text/css">
 
 #outerContainer {
@@ -454,15 +453,16 @@
             }
         }
     --></script>
-
+    
     <link type="text/css" rel="Stylesheet" href="plugins/sitemap/styles/sitemap.css" />
-    <script type="text/javascript" src="plugins/sitemap/sitemap.js"></script>
     <link type="text/css" rel="Stylesheet" href="plugins/page_notes/styles/page_notes.css" />
-    <script type="text/javascript" src="plugins/page_notes/page_notes.js"></script>
+    <link type="text/css" rel="Stylesheet" href="plugins/debug/styles/debug.css" />
+    <script src="resources/scripts/startPost.js"></script>
+
+
     <!--<link type="text/css" rel="Stylesheet" href="plugins/recordplay/styles/recordplay.css" />
     <script type="text/javascript" src="plugins/recordplay/recordplay.js"></script>-->
-    <link type="text/css" rel="Stylesheet" href="plugins/debug/styles/debug.css" />
-    <script type="text/javascript" src="plugins/debug/debug.js"></script>
+    
 
 </head>
 <body scroll="no" class="hashover">
@@ -490,7 +490,7 @@
             </div>
         </div>
         <div id="rightPanel">
-            <iframe id="mainFrame" name="mainFrame" width="100%" height="100%" src="" frameborder="0" style="display: block;"></iframe>
+            <iframe id="mainFrame" name="mainFrame" width="100%" height="100%" src="" frameborder="0" style="display: block;" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>
         </div>
 
     </div>
